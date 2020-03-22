@@ -5,21 +5,39 @@ import {
 } from 'react-digraph';
 
 import GraphConfig, {
-    edgeTypes,
     EMPTY_EDGE_TYPE,
-    EMPTY_TYPE,
+    FORK_JOIN_NODE,
     NODE_KEY,
-    nodeTypes,
-    COMPLEX_CIRCLE_TYPE,
-    POLY_TYPE,
-    SPECIAL_CHILD_SUBTYPE,
-    SPECIAL_EDGE_TYPE,
     SPECIAL_TYPE,
     SKINNY_TYPE,
 } from './graph-config';
 
+import * as Tree from './tree';
+
+import Button from '@material-ui/core/Button';
+import Snackbar from '@material-ui/core/Snackbar';
+import Alert from '@material-ui/lab/Alert';
+
+const startNodeId = "start";
+const endNodeId = "end";
+
 const sample = {
     edges: [
+        {
+            source: startNodeId,
+            target: 'm1',
+            type: EMPTY_EDGE_TYPE,
+        },
+        {
+            source: startNodeId,
+            target: 'm3',
+            type: EMPTY_EDGE_TYPE,
+        },
+        {
+            source: startNodeId,
+            target: 'm5',
+            type: EMPTY_EDGE_TYPE,
+        },
         {
             source: 'm1',
             target: 'm2',
@@ -34,50 +52,79 @@ const sample = {
             source: 'm5',
             target: 'm6',
             type: EMPTY_EDGE_TYPE,
+        },
+        {
+            source: 'm2',
+            target: endNodeId,
+            type: EMPTY_EDGE_TYPE,
+        },
+        {
+            source: 'm4',
+            target: endNodeId,
+            type: EMPTY_EDGE_TYPE,
+        },
+        {
+            source: 'm6',
+            target: endNodeId,
+            type: EMPTY_EDGE_TYPE,
         }
     ],
     nodes: [
         {
+            id: startNodeId,
+            title: "Fork",
+            x: 50,
+            y: 200,
+            type: FORK_JOIN_NODE
+        },
+        {
             id: 'm1',
             title: 'I',
             type: SKINNY_TYPE,
-            x: 100,
+            x: 250,
             y: 100,
         },
         {
             id: 'm2',
             title: 'II',
             type: SKINNY_TYPE,
-            x: 350,
+            x: 500,
             y: 100,
         },
         {
             id: 'm3',
             title: 'III',
             type: SKINNY_TYPE,
-            x: 100,
+            x: 250,
             y: 200,
         },
         {
             id: 'm4',
             title: 'IV',
             type: SKINNY_TYPE,
-            x: 350,
+            x: 500,
             y: 200,
         },
         {
             id: 'm5',
             title: 'V',
             type: SKINNY_TYPE,
-            x: 100,
+            x: 250,
             y: 300,
         },
         {
             id: 'm6',
             title: 'VI',
             type: SKINNY_TYPE,
-            x: 350,
+            x: 500,
             y: 300,
+        },
+        {
+            id: endNodeId,
+            title: "Join",
+            x: 700,
+            y: 200,
+            type: FORK_JOIN_NODE
         }
     ],
 };
@@ -91,8 +138,8 @@ class Graph extends React.Component {
         this.state = {
             copiedNode: null,
             graph: sample,
-            layoutEngineType: "SnapToGrid",
-            selected: null
+            selected: null,
+            snackbar: null
         };
 
         this.GraphView = React.createRef();
@@ -153,7 +200,7 @@ class Graph extends React.Component {
         // could be used here to determine node type
         // There is also support for subtypes. (see 'sample' above)
         // The subtype geometry will underlay the 'type' geometry for a node
-        const type = Math.random() < 0.25 ? SPECIAL_TYPE : EMPTY_TYPE;
+        const type = Math.random() < 0.25 ? SPECIAL_TYPE : FORK_JOIN_NODE;
 
         const viewNode = {
             id: Date.now(),
@@ -185,21 +232,15 @@ class Graph extends React.Component {
 
     // Creates a new node between two edges
     onCreateEdge = (sourceViewNode, targetViewNode) => {
-        const graph = this.state.graph;
-        // This is just an example - any sort of logic
-        // could be used here to determine edge type
-        const type =
-            sourceViewNode.type === SPECIAL_TYPE
-                ? SPECIAL_EDGE_TYPE
-                : EMPTY_EDGE_TYPE;
 
         const viewEdge = {
             source: sourceViewNode[NODE_KEY],
             target: targetViewNode[NODE_KEY],
-            type,
+            EMPTY_EDGE_TYPE,
         };
 
-        // Only add the edge when the source node is not the same as the target
+        const graph = this.state.graph;
+
         if (viewEdge.source !== viewEdge.target) {
             graph.edges = [...graph.edges, viewEdge];
             this.setState({
@@ -280,6 +321,145 @@ class Graph extends React.Component {
         this.forceUpdate();
     };
 
+    canDeleteNode = (node) => node[NODE_KEY] !== startNodeId && node[NODE_KEY] !== endNodeId;
+
+    validateModuleGraph = () => {
+        const edges = this.state.graph.edges;
+        if (edges.some(edge => edge.target === startNodeId || edge.source === endNodeId)) {
+            throw Error("Cannot have edges entering start node or going from end node.");
+        }
+
+        const treeBuilder = new Tree.TreeBuilder();
+
+        edges.filter(edge => edge.target !== endNodeId)
+            .forEach(edge => treeBuilder.fromEdge(edge));
+
+        const validator = new Tree.BreadthFirstSearchTreeValidator(treeBuilder);
+        const treeNodes = validator.validateTreeNodes();
+
+        const nodes = this.state.graph.nodes.filter(node => node[NODE_KEY] !== endNodeId);
+        nodes.forEach(node => {
+            if (!treeNodes.some(treeNode => treeNode.collection[0] === node[NODE_KEY])) {
+                throw Error("Not all nodes are connected.");
+            }
+        });
+
+        const lastModule = new Tree.ModuleCollection("and", [endNodeId])
+        treeNodes.filter(node => !node.children.length).forEach(node => {
+            if (!edges.some(edge => edge.source === node.collection[0] && edge.target === endNodeId)) {
+                throw new Error("Not all leafs are connected to end node.");
+            }
+
+            node.children.push(lastModule);
+            lastModule.parents.push(node);
+        });
+
+        treeNodes.push(lastModule);
+        return treeNodes;
+    }
+
+    intersection = (leftSet, rightSet) => {
+        const outherCollection = leftSet.length > rightSet.length ? rightSet : leftSet;
+        const innerCollection = leftSet.length > rightSet.length ? leftSet : rightSet;
+
+        const result = [];
+        outherCollection.forEach(outer => {
+            const common = innerCollection.filter(inner => inner.equalsTo(outer));
+            result.push(...common);
+        });
+
+        return result;
+    }
+
+    mergeParallel = (node) => {
+
+        if (node.isVisitedByMergeParallel) return;
+        node.isVisitedByMergeParallel = true;
+
+        const children = node.children;
+
+        let commonGrandChildren = [...children[0].children];
+        let allGrandChildren = [...children[0].children];
+        let index = 1;
+        do {
+            const currentGrandChildren = children[index++].children;
+            currentGrandChildren.forEach(currentGrandChild => {
+                if (!allGrandChildren.some(all => all.equalsTo(currentGrandChild))) {
+                    allGrandChildren.push(currentGrandChild);
+                }
+            });
+
+            commonGrandChildren = this.intersection(commonGrandChildren, currentGrandChildren);
+
+        } while (commonGrandChildren.length && index < children.length);
+
+        if (commonGrandChildren.length) {
+            const newId = [];
+            children.forEach(child => newId.push(...child.collection));
+
+            const newModule = new Tree.ModuleCollection("or", newId);
+            newModule.children = allGrandChildren;
+            newModule.parents = [node];
+
+            node.children = [newModule];
+
+            allGrandChildren.forEach(grandChild => grandChild.parents = [newModule]);
+        } else {
+            children.forEach(child => this.mergeParallel(child));
+        }
+    }
+
+    mergeSequential = (subModule) => {
+
+        if (subModule.isVisitedByMergeSequantial) return;
+        subModule.isVisitedByMergeSequantial = true;
+
+        const hasOneChild = subModule.children.length === 1;
+        const childHasOneParent = subModule.children[0].parents.length === 1;
+
+        if (hasOneChild && childHasOneParent) {
+
+            const child = subModule.children[0];
+            subModule.collection.push(...child.collection);
+
+            subModule.children = [];
+
+            child.children.forEach(grandChild => {
+                subModule.children.push(grandChild);
+
+                grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
+                grandChild.parents.push(subModule);
+            });
+
+        } else {
+            subModule.children.forEach(child => {
+                this.mergeSequential(child);
+            });
+        }
+    }
+
+    showValidationResult = () => {
+        try {
+            const treeNodes = this.validateModuleGraph();
+            const startNode = treeNodes[0];
+
+            // this.mergeSequential(startNode);
+            this.mergeParallel(startNode);
+            const f = 0;
+        } catch (error) {
+            this.setState({
+                snackbar: {
+                    success: false,
+                    message: error.message
+                }
+            });
+        }
+    }
+
+    handleClose = () => {
+        this.setState({ snackbar: null });
+    }
+
     render() {
         const { nodes, edges } = this.state.graph;
         const selected = this.state.selected;
@@ -288,6 +468,15 @@ class Graph extends React.Component {
         return (
             <div id="graph">
                 <div className="graph-header">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={this.showValidationResult}>Investigate reliability</Button>
+
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={this.showValidationResult}>{"Validate & Formalize"}</Button>
                 </div>
                 <GraphView
                     ref={el => (this.GraphView = el)}
@@ -298,7 +487,7 @@ class Graph extends React.Component {
                     nodeTypes={NodeTypes}
                     nodeSubtypes={NodeSubtypes}
                     edgeTypes={EdgeTypes}
-                    canCreateEdge={() => true}
+                    canDeleteNode={this.canDeleteNode}
                     onSelectNode={this.onSelectNode}
                     onCreateNode={this.onCreateNode}
                     onUpdateNode={this.onUpdateNode}
@@ -310,8 +499,24 @@ class Graph extends React.Component {
                     onUndo={this.onUndo}
                     onCopySelected={this.onCopySelected}
                     onPasteSelected={this.onPasteSelected}
-                    layoutEngineType={this.state.layoutEngineType}
+                    layoutEngineType="SnapToGrid"
                 />
+                <Snackbar
+                    open={!!this.state.snackbar}
+                    autoHideDuration={6000}
+                    onClose={this.handleClose}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+
+                    <Alert
+                        elevation={6}
+                        variant="filled"
+                        onClose={this.handleClose}
+                        severity={this.state.snackbar?.success ? "success" : "error"}>
+
+                        {this.state.snackbar?.message}
+                    </Alert>
+
+                </Snackbar>
             </div>
         );
     }
