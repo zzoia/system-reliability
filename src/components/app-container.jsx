@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -10,6 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import Graph from './graph';
 import ModuleGraphRules from './module-graph-rules';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import ReactJson from 'react-json-view'
 
 const theme = createMuiTheme({
     palette: {
@@ -71,7 +72,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function AppContainer() {
+
     const classes = useStyles();
+
+    const [json, setJson] = useState(0);
 
     return (
         <ThemeProvider theme={theme}>
@@ -83,7 +87,7 @@ export default function AppContainer() {
                     <Toolbar>
                         <Typography variant="h6" noWrap>
                             Reliability of System
-                    </Typography>
+                        </Typography>
                     </Toolbar>
                 </AppBar>
                 <Drawer
@@ -96,15 +100,15 @@ export default function AppContainer() {
                     }}>
                     <div className={classes.drawerHeader}>
                         Menu
-                </div>
+                    </div>
                     <Divider />
                     <ModuleGraphRules />
+                    <ReactJson src={json} />
                     <Divider />
                 </Drawer>
-                <main
-                    className={clsx(classes.content)}>
+                <main className={clsx(classes.content)}>
                     <div className={classes.drawerHeader} />
-                    <Graph />
+                    <Graph onValidated={setJson} />
                 </main>
             </div>
         </ThemeProvider>

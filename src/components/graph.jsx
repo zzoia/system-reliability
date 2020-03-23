@@ -8,7 +8,6 @@ import GraphConfig, {
     EMPTY_EDGE_TYPE,
     FORK_JOIN_NODE,
     NODE_KEY,
-    SPECIAL_TYPE,
     SKINNY_TYPE,
 } from './graph-config';
 
@@ -320,7 +319,7 @@ class Graph extends React.Component {
     validateModuleGraph = () => {
         const edges = this.state.graph.edges;
         if (edges.some(edge => edge.target === startNodeId || edge.source === endNodeId)) {
-            throw Error("Cannot have edges entering start node or going from end node.");
+            throw Error("Існують ребра, які входять в початковий вузол або, які виходять із кінцевого");
         }
 
         const treeBuilder = new Tree.TreeBuilder();
@@ -333,15 +332,15 @@ class Graph extends React.Component {
 
         const nodes = this.state.graph.nodes.filter(node => node[NODE_KEY] !== endNodeId);
         nodes.forEach(node => {
-            if (!treeNodes.some(treeNode => treeNode.collection[0].id === node[NODE_KEY])) {
-                throw Error("Not all nodes are connected.");
+            if (!treeNodes.some(treeNode => treeNode.id === node[NODE_KEY])) {
+                throw Error("Не всі вершини з'єднані: з'єднайте їх або видаліть");
             }
         });
 
-        const lastModule = new Tree.ModuleCollection("and", [new Tree.SingleModule(endNodeId)])
+        const lastModule = new Tree.SingleModule(endNodeId);
         treeNodes.filter(node => !node.children.length).forEach(node => {
-            if (!edges.some(edge => edge.source === node.collection[0].id && edge.target === endNodeId)) {
-                throw new Error("Not all leafs are connected to end node.");
+            if (!edges.some(edge => edge.source === node.id && edge.target === endNodeId)) {
+                throw new Error("Не всі останні вузли приєднані до кінцевого вузла");
             }
 
             node.children.push(lastModule);
@@ -429,8 +428,8 @@ class Graph extends React.Component {
         subModule.isVisitedByMergeSequantial = true;
 
         if (!subModule.children.length) {
-            if (subModule.collection[0].id !== endNodeId) {
-                throw Error("Childless module is not ending module.")
+            if (subModule.id !== endNodeId) {
+                throw Error("Модуль без нащадків не є кінцевим вузлом")
             }
 
             return subModule;
@@ -439,27 +438,34 @@ class Graph extends React.Component {
         while (this.hasOneChildWithOneParent(subModule)) {
 
             const child = subModule.children[0];
-            const andSubSystem = new Tree.ModuleCollection("and", [subModule, child])
+            
+            if (subModule.dependency === "and") {
 
-            subModule.parents.forEach(parent => {
-                parent.children = parent.children.filter(sibling => !sibling.equalsTo(subModule));
-                parent.children.push(andSubSystem);
-                andSubSystem.parents.push(parent);
-            });
-            subModule.parents = [];
-            subModule.children = [];
+                subModule.collection.push(child);
+                subModule.children = [];
+            } else {
+
+                let andSubSystem = new Tree.ModuleCollection("and", [subModule, child]);
+                subModule.parents.forEach(parent => {
+                    parent.children = parent.children.filter(sibling => !sibling.equalsTo(subModule));
+                    parent.children.push(andSubSystem);
+                    andSubSystem.parents.push(parent);
+                });
+                subModule.parents = [];
+                subModule.children = [];
+
+                subModule = andSubSystem;
+            }
 
             child.children.forEach(grandChild => {
-                andSubSystem.children.push(grandChild);
+                subModule.children.push(grandChild);
 
                 grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
-                grandChild.parents.push(andSubSystem);
+                grandChild.parents.push(subModule);
             });
 
             child.children = [];
             child.parents = [];
-
-            subModule = andSubSystem;
         }
 
         const newChildren = []
@@ -481,7 +487,8 @@ class Graph extends React.Component {
                 this.mergeParallel(startNode);
             } while (startNode.children.length);
 
-            console.log(startNode.getRepresentation());
+            this.props.onValidated(startNode.getRepresentation());
+
         } catch (error) {
             this.setState({
                 snackbar: {
@@ -507,12 +514,12 @@ class Graph extends React.Component {
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={this.showValidationResult}>Investigate reliability</Button>
+                        onClick={this.showValidationResult}>Перевірити надійність</Button>
 
                     <Button
                         variant="outlined"
                         color="primary"
-                        onClick={this.showValidationResult}>{"Validate & Formalize"}</Button>
+                        onClick={this.showValidationResult}>{"Перевірити & Формалізувати"}</Button>
                 </div>
                 <GraphView
                     ref={el => (this.GraphView = el)}

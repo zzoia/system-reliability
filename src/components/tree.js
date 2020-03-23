@@ -53,14 +53,14 @@ export class TreeBuilder {
 
             if (!node.hasParents()) {
                 if (root) {
-                    throw Error("Tree has more then one node with no parents.");
+                    throw Error("В графі є більше, ніж один вузол без предків");
                 }
                 root = node;
             }
         });
 
         if (!root) {
-            throw Error("Node without parents not found.");
+            throw Error("Не знайдено вузла без предків (кореня)");
         }
 
         return root;
@@ -81,20 +81,20 @@ export class DepthFirstSearchTreeValidator {
         while (stack.length) {
             const node = stack.pop();
             if (stack.some(prev => prev.id === node.id)) {
-                throw Error(`Cycle detected while BFS traversing the graph. Node '${node.id}' is already on the stack.`);
+                throw Error(`Знайдено цикл під час BFS обходу графу. Вузол '${node.id}' вже є на стеку`);
             }
 
             if (node.children.length > 1) {
                 node.children.forEach(child => {
                     if (child.parents.length > 1) {
-                        throw Error(`Net detected in the graph. '${node.id}' has many children and the child '${child.id}' has many parents.`);
+                        throw Error(`Знайдено сітку в графі. '${node.id}' має багатьої нащадків, з них '${child.id}' має багато предків.`);
                     }
                 });
             }
 
             if (!accumulator.some(existingNode => existingNode.node.id === node.id)) {
                 accumulator.push({
-                    currentModule: new ModuleCollection("and", [new SingleModule(node.id)]),
+                    currentModule: new SingleModule(node.id),
                     node: node
                 });
             }
@@ -108,12 +108,12 @@ export class DepthFirstSearchTreeValidator {
         accumulator.forEach(({ currentModule, node }) => {
 
             node.children.forEach(nodeChild => {
-                const childModule = treeNodes.find(cModule => cModule.collection[0].id === nodeChild.id);
+                const childModule = treeNodes.find(cModule => cModule.id === nodeChild.id);
                 currentModule.children.push(childModule);
             });
 
             node.parents.forEach(nodeParent => {
-                const parentModule = treeNodes.find(pModule => pModule.collection[0].id === nodeParent.id);
+                const parentModule = treeNodes.find(pModule => pModule.id === nodeParent.id);
                 currentModule.parents.push(parentModule);
             });
         });
