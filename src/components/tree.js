@@ -73,19 +73,27 @@ export class DepthFirstSearchTreeValidator {
         this.treeBuilder = treeBuilder;
     }
 
-    validateTreeNodes() {
+    validate() {
         const root = this.treeBuilder.getRoot();
-        const treeNodes = [];
+        const accumulator = [];
 
         const stack = [root];
         while (stack.length) {
             const node = stack.pop();
             if (stack.some(prev => prev.id === node.id)) {
-                throw Error("Cycle detected while BFS traversing the graph.");
+                throw Error(`Cycle detected while BFS traversing the graph. Node '${node.id}' is already on the stack.`);
             }
 
-            if (!treeNodes.some(existingNode => existingNode.node.id === node.id)) {
-                treeNodes.push({
+            if (node.children.length > 1) {
+                node.children.forEach(child => {
+                    if (child.parents.length > 1) {
+                        throw Error(`Net detected in the graph. '${node.id}' has many children and the child '${child.id}' has many parents.`);
+                    }
+                });
+            }
+
+            if (!accumulator.some(existingNode => existingNode.node.id === node.id)) {
+                accumulator.push({
                     currentModule: new ModuleCollection("and", [new SingleModule(node.id)]),
                     node: node
                 });
@@ -95,40 +103,22 @@ export class DepthFirstSearchTreeValidator {
                 stack.push(child);
             })
         }
-        // const collection = [root];
 
-        // const treeNodes = [];
-
-        // while (collection.length) {
-        //     const node = collection.shift();
-        //     if (node.isVisited) {
-        //         throw Error("The graph is not tree because BFS found same node twice.");
-        //     }
-
-        //     node.isVisited = true;
-        //     treeNodes.push({
-        //         currentModule: new ModuleCollection("and", [new SingleModule(node.id)]),
-        //         node: node
-        //     });
-
-        //     collection.unshift(...node.children);
-        // }
-
-        const modules = treeNodes.map(treeNode => treeNode.currentModule);
-        treeNodes.forEach(({ currentModule, node }) => {
+        const treeNodes = accumulator.map(treeNode => treeNode.currentModule);
+        accumulator.forEach(({ currentModule, node }) => {
 
             node.children.forEach(nodeChild => {
-                const childModule = modules.find(cModule => cModule.collection[0].id === nodeChild.id);
+                const childModule = treeNodes.find(cModule => cModule.collection[0].id === nodeChild.id);
                 currentModule.children.push(childModule);
             });
 
             node.parents.forEach(nodeParent => {
-                const parentModule = modules.find(pModule => pModule.collection[0].id === nodeParent.id);
+                const parentModule = treeNodes.find(pModule => pModule.collection[0].id === nodeParent.id);
                 currentModule.parents.push(parentModule);
             });
         });
 
-        return modules;
+        return treeNodes;
     }
 }
 
@@ -139,6 +129,10 @@ export class SubSystem {
     }
 
     equalsTo(anotherSubSystem) {
+        throw Error("Abstract method invoked.");
+    }
+
+    getRepresentation() {
         throw Error("Abstract method invoked.");
     }
 

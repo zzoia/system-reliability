@@ -329,7 +329,7 @@ class Graph extends React.Component {
             .forEach(edge => treeBuilder.fromEdge(edge));
 
         const validator = new Tree.DepthFirstSearchTreeValidator(treeBuilder);
-        const treeNodes = validator.validateTreeNodes();
+        const treeNodes = validator.validate();
 
         const nodes = this.state.graph.nodes.filter(node => node[NODE_KEY] !== endNodeId);
         nodes.forEach(node => {
@@ -409,6 +409,10 @@ class Graph extends React.Component {
         }
     }
 
+    hasOneChildWithOneParent(subModule) {
+        return subModule.children.length === 1 && subModule.children[0].parents.length === 1;
+    }
+
     mergeSequential = (subModule) => {
 
         subModule.isVisitedByMergeParallel = false;
@@ -418,15 +422,12 @@ class Graph extends React.Component {
         if (!subModule.children.length) {
             if (subModule.collection[0].id !== endNodeId) {
                 throw Error("Childless module is not ending module.")
-            } 
+            }
 
             return;
         }
 
-        const hasOneChild = subModule.children.length === 1;
-        const childHasOneParent = subModule.children[0].parents.length === 1;
-
-        if (hasOneChild && childHasOneParent) {
+        while (this.hasOneChildWithOneParent(subModule)) {
 
             const child = subModule.children[0];
 
@@ -440,15 +441,15 @@ class Graph extends React.Component {
                 grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
                 grandChild.parents.push(subModule);
             });
-            
+
             child.children = [];
             child.parents = [];
-
-        } else {
-            subModule.children.forEach(child => {
-                this.mergeSequential(child);
-            });
         }
+
+        subModule.children.forEach(child => {
+            this.mergeSequential(child);
+        });
+
     }
 
     showValidationResult = () => {
@@ -459,8 +460,8 @@ class Graph extends React.Component {
             do {
                 this.mergeSequential(startNode);
                 this.mergeParallel(startNode);
-            } while (startNode.children[0].collection[0].id !== endNodeId);
-            
+            } while (startNode.children.length);
+
             console.log(startNode.getRepresentation());
         } catch (error) {
             this.setState({
