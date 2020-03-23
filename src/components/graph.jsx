@@ -472,24 +472,24 @@ class Graph extends React.Component {
     }
 
     showValidationResult = () => {
-        // try {
-        const treeNodes = this.validateModuleGraph();
-        let startNode = treeNodes[0];
+        try {
+            const treeNodes = this.validateModuleGraph();
+            let startNode = treeNodes[0];
 
-        do {
-            startNode = this.mergeSequential(startNode);
-            this.mergeParallel(startNode);
-        } while (startNode.children.length);
+            do {
+                startNode = this.mergeSequential(startNode);
+                this.mergeParallel(startNode);
+            } while (startNode.children.length);
 
-        console.log(startNode.getRepresentation());
-        // } catch (error) {
-        //     this.setState({
-        //         snackbar: {
-        //             success: false,
-        //             message: error.message
-        //         }
-        //     });
-        // }
+            console.log(startNode.getRepresentation());
+        } catch (error) {
+            this.setState({
+                snackbar: {
+                    success: false,
+                    message: error.message
+                }
+            });
+        }
     }
 
     handleClose = () => {
