@@ -352,19 +352,6 @@ class Graph extends React.Component {
         return treeNodes;
     }
 
-    intersection = (leftSet, rightSet) => {
-        const outherCollection = leftSet.length > rightSet.length ? rightSet : leftSet;
-        const innerCollection = leftSet.length > rightSet.length ? leftSet : rightSet;
-
-        const result = [];
-        outherCollection.forEach(outer => {
-            const common = innerCollection.filter(inner => inner.equalsTo(outer));
-            result.push(...common);
-        });
-
-        return result;
-    }
-
     mergeParallel = (subModule) => {
 
         subModule.isVisitedByMergeSequantial = false;
@@ -376,35 +363,57 @@ class Graph extends React.Component {
             return;
         }
 
-        let commonGrandChildren = [...children[0].children];
-        let allGrandChildren = [...children[0].children];
-        let index = 1;
-        do {
-            const currentGrandChildren = children[index++].children;
-            currentGrandChildren.forEach(currentGrandChild => {
-                if (!allGrandChildren.some(all => all.equalsTo(currentGrandChild))) {
-                    allGrandChildren.push(currentGrandChild);
+        if (children.length === 1) {
+            this.mergeParallel(subModule.children[0]);
+            return;
+        }
+
+        let commonGrandChildren = [];
+        children.forEach((child, childIndex) => {
+            if (child.children.length === 1) {
+                const onlyChild = child.children[0];
+                const found = commonGrandChildren.find(common => common.grandChild.equalsTo(onlyChild));
+
+                if (found) {
+                    found.childIndices.push(childIndex);
+                } else {
+                    commonGrandChildren.push({
+                        childIndices: [childIndex],
+                        grandChild: onlyChild
+                    });
                 }
+            }
+        });
+
+        commonGrandChildren = commonGrandChildren.filter(common => common.childIndices.length > 1);
+        if (commonGrandChildren.length) {
+
+            commonGrandChildren.forEach(common => {
+
+                const childrenToMerge = common.childIndices.map(index => {
+                    const currentChild = children[index];
+
+                    currentChild.parents = [];
+                    currentChild.children = [];
+
+                    subModule.children = subModule.children.filter(child => !child.equalsTo(currentChild));
+                    common.grandChild.parents = common.grandChild.parents.filter(parent => !parent.equalsTo(currentChild));
+
+                    return currentChild;
+                });
+
+                const newModule = new Tree.ModuleCollection("or", childrenToMerge);
+                newModule.children = [common.grandChild];
+                newModule.parents = [subModule];
+
+                subModule.children.push(newModule);
+                common.grandChild.parents.push(newModule);
+
+                this.mergeParallel(common.grandChild);
             });
 
-            commonGrandChildren = this.intersection(commonGrandChildren, currentGrandChildren);
-
-        } while (commonGrandChildren.length && index < children.length);
-
-        if (commonGrandChildren.length) {
-            children.forEach(child => {
-                child.parents = [];
-                child.children = [];
-            })
-
-            const newModule = new Tree.ModuleCollection("or", children);
-            newModule.children = allGrandChildren;
-            newModule.parents = [subModule];
-
-            subModule.children = [newModule];
-
-            allGrandChildren.forEach(grandChild => grandChild.parents = [newModule]);
         } else {
+
             children.forEach(child => this.mergeParallel(child));
         }
     }
@@ -430,7 +439,7 @@ class Graph extends React.Component {
         while (this.hasOneChildWithOneParent(subModule)) {
 
             const child = subModule.children[0];
-
+            //const andSubSystem = new Tree.ModuleCollection("and", [subModule, child])
             subModule.collection.push(child);
 
             subModule.children = [];
@@ -453,24 +462,24 @@ class Graph extends React.Component {
     }
 
     showValidationResult = () => {
-        try {
-            const treeNodes = this.validateModuleGraph();
-            const startNode = treeNodes[0];
+        // try {
+        const treeNodes = this.validateModuleGraph();
+        const startNode = treeNodes[0];
 
-            do {
-                this.mergeSequential(startNode);
-                this.mergeParallel(startNode);
-            } while (startNode.children.length);
+        do {
+            this.mergeSequential(startNode);
+            this.mergeParallel(startNode);
+        } while (startNode.children.length);
 
-            console.log(startNode.getRepresentation());
-        } catch (error) {
-            this.setState({
-                snackbar: {
-                    success: false,
-                    message: error.message
-                }
-            });
-        }
+        console.log(startNode.getRepresentation());
+        // } catch (error) {
+        //     this.setState({
+        //         snackbar: {
+        //             success: false,
+        //             message: error.message
+        //         }
+        //     });
+        // }
     }
 
     handleClose = () => {
