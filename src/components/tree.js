@@ -67,7 +67,7 @@ export class TreeBuilder {
     }
 }
 
-export class BreadthFirstSearchTreeValidator {
+export class DepthFirstSearchTreeValidator {
 
     constructor(treeBuilder) {
         this.treeBuilder = treeBuilder;
@@ -75,35 +75,55 @@ export class BreadthFirstSearchTreeValidator {
 
     validateTreeNodes() {
         const root = this.treeBuilder.getRoot();
-        const collection = [root];
-
         const treeNodes = [];
 
-        while (collection.length) {
-            const node = collection.shift();
-            if (node.isVisited) {
-                throw Error("The graph is not tree because BFS found same node twice.");
+        const stack = [root];
+        while (stack.length) {
+            const node = stack.pop();
+            if (stack.some(prev => prev.id === node.id)) {
+                throw Error("Cycle detected while BFS traversing the graph.");
             }
 
-            node.isVisited = true;
-            treeNodes.push({
-                currentModule: new ModuleCollection("and", [node.id]),
-                node: node
-            });
+            if (!treeNodes.some(existingNode => existingNode.node.id === node.id)) {
+                treeNodes.push({
+                    currentModule: new ModuleCollection("and", [new SingleModule(node.id)]),
+                    node: node
+                });
+            }
 
-            collection.unshift(...node.children);
+            node.children.forEach(child => {
+                stack.push(child);
+            })
         }
+        // const collection = [root];
+
+        // const treeNodes = [];
+
+        // while (collection.length) {
+        //     const node = collection.shift();
+        //     if (node.isVisited) {
+        //         throw Error("The graph is not tree because BFS found same node twice.");
+        //     }
+
+        //     node.isVisited = true;
+        //     treeNodes.push({
+        //         currentModule: new ModuleCollection("and", [new SingleModule(node.id)]),
+        //         node: node
+        //     });
+
+        //     collection.unshift(...node.children);
+        // }
 
         const modules = treeNodes.map(treeNode => treeNode.currentModule);
         treeNodes.forEach(({ currentModule, node }) => {
 
             node.children.forEach(nodeChild => {
-                const childModule = modules.find(cModule => cModule.collection[0] === nodeChild.id);
+                const childModule = modules.find(cModule => cModule.collection[0].id === nodeChild.id);
                 currentModule.children.push(childModule);
             });
 
             node.parents.forEach(nodeParent => {
-                const parentModule = modules.find(pModule => pModule.collection[0] === nodeParent.id);
+                const parentModule = modules.find(pModule => pModule.collection[0].id === nodeParent.id);
                 currentModule.parents.push(parentModule);
             });
         });
@@ -112,35 +132,79 @@ export class BreadthFirstSearchTreeValidator {
     }
 }
 
-export class SingleModule {
-    constructor(id) {
-
-    }
-}
-
-export class ModuleCollection {
-    constructor(dependency, collection) {
-        this.dependency = dependency;
-        this.collection = collection;
+export class SubSystem {
+    constructor() {
         this.parents = [];
         this.children = [];
     }
 
-    equalsTo(anotherModule) {
+    equalsTo(anotherSubSystem) {
+        throw Error("Abstract method invoked.");
+    }
 
-        if (this.collection.length !== anotherModule.collection.length) {
+}
+
+export class SingleModule extends SubSystem {
+    constructor(id) {
+        super();
+
+        this.id = id;
+    }
+
+    equalsTo(anotherSubSystem) {
+        return this.id === anotherSubSystem.id;
+    }
+
+    getRepresentation() {
+        return this.id;
+    }
+}
+
+export class ModuleCollection extends SubSystem {
+    constructor(dependency, collection) {
+        super();
+
+        this.dependency = dependency;
+        this.collection = collection;
+    }
+
+    equalsTo(anotherSubSystem) {
+
+        if (!anotherSubSystem.collection) {
+            return false;
+        }
+
+        if (this.collection.length !== anotherSubSystem.collection.length) {
             return false;
         }
 
         this.collection.sort();
-        anotherModule.collection.sort();
-        
+        anotherSubSystem.collection.sort();
+
         for (let index = 0; index < this.collection.length; index++) {
-            if (this.collection[index] !== anotherModule.collection[index]) {
+            const item = this.collection[index];
+            if (!anotherSubSystem.collection.some(other => other.equalsTo(item))) {
                 return false;
             }
         }
 
         return true;
     }
+
+    getRepresentation() {
+
+        if (this.collection.length === 1) {
+            return this.collection[0].getRepresentation();
+        }
+
+        const representation = [];
+        this.collection.forEach(item => {
+            representation.push(item.getRepresentation());
+        });
+
+        return {
+            [this.dependency]: representation
+        };
+    }
+
 }

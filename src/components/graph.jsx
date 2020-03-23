@@ -196,16 +196,10 @@ class Graph extends React.Component {
     onCreateNode = (x, y) => {
         const graph = this.state.graph;
 
-        // This is just an example - any sort of logic
-        // could be used here to determine node type
-        // There is also support for subtypes. (see 'sample' above)
-        // The subtype geometry will underlay the 'type' geometry for a node
-        const type = Math.random() < 0.25 ? SPECIAL_TYPE : FORK_JOIN_NODE;
-
         const viewNode = {
             id: Date.now(),
             title: '',
-            type,
+            type: SKINNY_TYPE,
             x,
             y,
         };
@@ -334,19 +328,19 @@ class Graph extends React.Component {
         edges.filter(edge => edge.target !== endNodeId)
             .forEach(edge => treeBuilder.fromEdge(edge));
 
-        const validator = new Tree.BreadthFirstSearchTreeValidator(treeBuilder);
+        const validator = new Tree.DepthFirstSearchTreeValidator(treeBuilder);
         const treeNodes = validator.validateTreeNodes();
 
         const nodes = this.state.graph.nodes.filter(node => node[NODE_KEY] !== endNodeId);
         nodes.forEach(node => {
-            if (!treeNodes.some(treeNode => treeNode.collection[0] === node[NODE_KEY])) {
+            if (!treeNodes.some(treeNode => treeNode.collection[0].id === node[NODE_KEY])) {
                 throw Error("Not all nodes are connected.");
             }
         });
 
-        const lastModule = new Tree.ModuleCollection("and", [endNodeId])
+        const lastModule = new Tree.ModuleCollection("and", [new Tree.SingleModule(endNodeId)])
         treeNodes.filter(node => !node.children.length).forEach(node => {
-            if (!edges.some(edge => edge.source === node.collection[0] && edge.target === endNodeId)) {
+            if (!edges.some(edge => edge.source === node.collection[0].id && edge.target === endNodeId)) {
                 throw new Error("Not all leafs are connected to end node.");
             }
 
@@ -371,12 +365,16 @@ class Graph extends React.Component {
         return result;
     }
 
-    mergeParallel = (node) => {
+    mergeParallel = (subModule) => {
 
-        if (node.isVisitedByMergeParallel) return;
-        node.isVisitedByMergeParallel = true;
+        subModule.isVisitedByMergeSequantial = false;
+        if (subModule.isVisitedByMergeParallel) return;
+        subModule.isVisitedByMergeParallel = true;
 
-        const children = node.children;
+        const children = subModule.children;
+        if (children.length <= 1) {
+            return;
+        }
 
         let commonGrandChildren = [...children[0].children];
         let allGrandChildren = [...children[0].children];
@@ -394,14 +392,16 @@ class Graph extends React.Component {
         } while (commonGrandChildren.length && index < children.length);
 
         if (commonGrandChildren.length) {
-            const newId = [];
-            children.forEach(child => newId.push(...child.collection));
+            children.forEach(child => {
+                child.parents = [];
+                child.children = [];
+            })
 
-            const newModule = new Tree.ModuleCollection("or", newId);
+            const newModule = new Tree.ModuleCollection("or", children);
             newModule.children = allGrandChildren;
-            newModule.parents = [node];
+            newModule.parents = [subModule];
 
-            node.children = [newModule];
+            subModule.children = [newModule];
 
             allGrandChildren.forEach(grandChild => grandChild.parents = [newModule]);
         } else {
@@ -411,8 +411,17 @@ class Graph extends React.Component {
 
     mergeSequential = (subModule) => {
 
+        subModule.isVisitedByMergeParallel = false;
         if (subModule.isVisitedByMergeSequantial) return;
         subModule.isVisitedByMergeSequantial = true;
+
+        if (!subModule.children.length) {
+            if (subModule.collection[0].id !== endNodeId) {
+                throw Error("Childless module is not ending module.")
+            } 
+
+            return;
+        }
 
         const hasOneChild = subModule.children.length === 1;
         const childHasOneParent = subModule.children[0].parents.length === 1;
@@ -420,7 +429,8 @@ class Graph extends React.Component {
         if (hasOneChild && childHasOneParent) {
 
             const child = subModule.children[0];
-            subModule.collection.push(...child.collection);
+
+            subModule.collection.push(child);
 
             subModule.children = [];
 
@@ -430,6 +440,9 @@ class Graph extends React.Component {
                 grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
                 grandChild.parents.push(subModule);
             });
+            
+            child.children = [];
+            child.parents = [];
 
         } else {
             subModule.children.forEach(child => {
@@ -443,9 +456,12 @@ class Graph extends React.Component {
             const treeNodes = this.validateModuleGraph();
             const startNode = treeNodes[0];
 
-            // this.mergeSequential(startNode);
-            this.mergeParallel(startNode);
-            const f = 0;
+            do {
+                this.mergeSequential(startNode);
+                this.mergeParallel(startNode);
+            } while (startNode.children[0].collection[0].id !== endNodeId);
+            
+            console.log(startNode.getRepresentation());
         } catch (error) {
             this.setState({
                 snackbar: {
