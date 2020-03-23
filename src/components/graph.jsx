@@ -425,7 +425,7 @@ class Graph extends React.Component {
     mergeSequential = (subModule) => {
 
         subModule.isVisitedByMergeParallel = false;
-        if (subModule.isVisitedByMergeSequantial) return;
+        if (subModule.isVisitedByMergeSequantial) return subModule;
         subModule.isVisitedByMergeSequantial = true;
 
         if (!subModule.children.length) {
@@ -433,41 +433,51 @@ class Graph extends React.Component {
                 throw Error("Childless module is not ending module.")
             }
 
-            return;
+            return subModule;
         }
 
         while (this.hasOneChildWithOneParent(subModule)) {
 
             const child = subModule.children[0];
-            //const andSubSystem = new Tree.ModuleCollection("and", [subModule, child])
-            subModule.collection.push(child);
+            const andSubSystem = new Tree.ModuleCollection("and", [subModule, child])
 
+            subModule.parents.forEach(parent => {
+                parent.children = parent.children.filter(sibling => !sibling.equalsTo(subModule));
+                parent.children.push(andSubSystem);
+                andSubSystem.parents.push(parent);
+            });
+            subModule.parents = [];
             subModule.children = [];
 
             child.children.forEach(grandChild => {
-                subModule.children.push(grandChild);
+                andSubSystem.children.push(grandChild);
 
                 grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
-                grandChild.parents.push(subModule);
+                grandChild.parents.push(andSubSystem);
             });
 
             child.children = [];
             child.parents = [];
+
+            subModule = andSubSystem;
         }
 
+        const newChildren = []
         subModule.children.forEach(child => {
-            this.mergeSequential(child);
+            newChildren.push(this.mergeSequential(child));
         });
 
+        subModule.children = newChildren;
+        return subModule;
     }
 
     showValidationResult = () => {
         // try {
         const treeNodes = this.validateModuleGraph();
-        const startNode = treeNodes[0];
+        let startNode = treeNodes[0];
 
         do {
-            this.mergeSequential(startNode);
+            startNode = this.mergeSequential(startNode);
             this.mergeParallel(startNode);
         } while (startNode.children.length);
 
