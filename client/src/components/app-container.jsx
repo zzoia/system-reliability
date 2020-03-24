@@ -10,7 +10,8 @@ import Divider from '@material-ui/core/Divider';
 import Graph from './graph';
 import ModuleGraphRules from './module-graph-rules';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import SystemJsonView from './system-json-view';
+import AdjacencyList from './adjacency-list';
+import ValidatedJsonGraph from './validated-json-graph';
 
 const theme = createMuiTheme({
     palette: {
@@ -78,16 +79,22 @@ export default function AppContainer() {
 
     const classes = useStyles();
 
-    const [json, setJson] = useState(0);
-
+    const [json, setJson] = useState(null);
     const [open, setOpen] = React.useState(false);
+    const [adjacencyList, setAdjacencyList] = React.useState([]);
 
-    const openJsonView = (json) => {
+    const openJsonView = async (json) => {
         if (!json) {
             setOpen(false);
         } else {
             setJson(json);
             setOpen(true);
+
+            const response = await fetch("http://localhost:53294/systemreliability/test", {
+                method: "POST", headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+            setAdjacencyList(await response.json());
         }
     }
 
@@ -97,16 +104,14 @@ export default function AppContainer() {
                 <CssBaseline />
                 <AppBar
                     position="fixed"
-                    className={clsx(classes.appBar, {
-                        [classes.appBarShift]: open,
-                    })}>
+                    className={clsx(classes.appBar)}>
                     <Toolbar>
                         <Typography variant="h6" noWrap>
                             Reliability of System
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <SystemJsonView open={open} json={json} />
+                <AdjacencyList open={open} adjacencyList={adjacencyList} />
                 <main className={clsx(classes.content)}>
                     <div className={classes.drawerHeader} />
                     <Graph onValidated={openJsonView} />
@@ -121,11 +126,10 @@ export default function AppContainer() {
                     }}>
                     <div className={classes.drawerHeader}>
                     </div>
-                    <Divider />
                     <ModuleGraphRules />
-                    <Divider />
+                    <ValidatedJsonGraph json={json} />
                 </Drawer>
-            </div>
-        </ThemeProvider>
+            </div >
+        </ThemeProvider >
     );
 }

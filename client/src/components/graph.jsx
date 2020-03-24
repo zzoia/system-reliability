@@ -243,7 +243,7 @@ class Graph extends React.Component {
                     message: error.message
                 }
             });
-            
+
             this.props.onValidated(null);
         }
     }
@@ -261,7 +261,7 @@ class Graph extends React.Component {
             <div id="graph">
                 <div className="graph-header">
                     <Button
-                        variant="outlined"
+                        variant="contained"
                         color="primary"
                         onClick={this.showValidationResult}>{"Перевірити & Формалізувати"}</Button>
                 </div>

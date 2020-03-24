@@ -5,6 +5,11 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 class ModuleGraphRules extends React.Component {
 
@@ -13,28 +18,38 @@ class ModuleGraphRules extends React.Component {
 
         this.state = {
             rules: [
-                "To add nodes, hold shift and click on the grid.",
-                "To add edges, hold shift and click/drag to between nodes.",
-                "To delete a node or edge, click on it and press delete.",
-                "Click and drag nodes to change their position."
+                "Щоб додати модулі, натисніть Shift і клацніть на сітці",
+                "Щоб додати переходи, затисніть Shift і почність тягнути мишею від одного модуля до іншого",
+                "Щоб видалити перехід чи модуль, виберіть його за допомогою миші і натисність Delete",
+                "Перетягуйте мишею об'єкти, щоб змінити їх положення"
             ]
         }
     }
 
     render() {
         return (
-            <List component="nav" aria-label="main mailbox folders">
-                {
-                    this.state.rules.map((rule, index) => (
-                        <ListItem button key={index}>
-                            <ListItemIcon>
-                                <CheckRoundedIcon color="secondary" />
-                            </ListItemIcon>
-                            <ListItemText primary={rule} />
-                        </ListItem>
-                    ))
-                }
-            </List>
+            <ExpansionPanel>
+                <ExpansionPanelSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header">
+                    <Typography>Інструкції</Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                    <List component="nav">
+                        {
+                            this.state.rules.map((rule, index) => (
+                                <ListItem button key={index}>
+                                    <ListItemIcon>
+                                        <CheckRoundedIcon color="secondary" />
+                                    </ListItemIcon>
+                                    <ListItemText primary={rule} />
+                                </ListItem>
+                            ))
+                        }
+                    </List>
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
         );
     }
 

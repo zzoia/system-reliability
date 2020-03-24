@@ -51,13 +51,12 @@ namespace ReliabilityModel.Api.Controllers
         private static SystemStateModel ToModel(SystemState systemState)
             => new SystemStateModel
             {
-                IsTerminal = systemState.IsTerminal,
-                IsWaitingRecovery = systemState.IsWaitingRecovery,
-                IsWorking = systemState.IsWorking,
+                Status = systemState.IsTerminal ? "terminal" : (systemState.IsWorking ? "working" : "waitingRecovery"),
                 ModuleStates = systemState.ModuleStates.Select(state => new ModuleStateModel
                 {
                     Left = state.Left,
-                    IsWorking = state.IsWorking
+                    IsWorking = state.IsWorking,
+                    Name = state.Module.Name
                 })
             };
     }
