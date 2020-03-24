@@ -1,11 +1,7 @@
 import * as React from 'react';
 
-export const NODE_KEY = 'id'; // Key used to identify nodes
-
-// These keys are arbitrary (but must match the config)
-// However, GraphView renders text differently for empty types
-// so this has to be passed in if that behavior is desired.
-export const FORK_JOIN_NODE = 'forkJoinNode'; // Empty node type
+export const NODE_KEY = 'id'; 
+export const FORK_JOIN_NODE = 'forkJoinNode';
 export const POLY_TYPE = 'poly';
 export const SPECIAL_TYPE = 'special';
 export const SKINNY_TYPE = 'skinny';

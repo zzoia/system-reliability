@@ -10,7 +10,9 @@ import GraphConfig, {
 
 import { DefaultSystemGarph, startNodeId, endNodeId, romanize } from '../utils/graph-data';
 
-import * as Tree from '../utils/tree';
+import { DepthFirstSearchTreeValidator } from "../utils/depth-first-search-tree-validator";
+import { TreeBuilder } from "../utils/tree-builder";
+import { SequentialParallel } from "../utils/sequential-parallel";
 
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -168,12 +170,7 @@ class Graph extends React.Component {
     };
 
     onUndo = () => {
-        // Not implemented
         console.warn('Undo is not currently implemented in the example.');
-        // Normally any add, remove, or update would record the action in an array.
-        // In order to undo it one would simply call the inverse of the action performed. For instance, if someone
-        // called onDeleteEdge with (viewEdge, i, edges) then an undelete would be a splicing the original viewEdge
-        // into the edges array at position i.
     };
 
     onCopySelected = () => {
@@ -213,11 +210,11 @@ class Graph extends React.Component {
             throw Error("Існують ребра, які входять в початковий вузол або, які виходять із кінцевого");
         }
 
-        const treeBuilder = new Tree.TreeBuilder();
+        const treeBuilder = new TreeBuilder();
 
         edges.forEach(edge => treeBuilder.fromEdge(edge));
 
-        const validator = new Tree.DepthFirstSearchTreeValidator(treeBuilder);
+        const validator = new DepthFirstSearchTreeValidator(treeBuilder);
         const treeNodes = validator.validate();
 
         const nodes = this.state.graph.nodes;
@@ -234,7 +231,7 @@ class Graph extends React.Component {
         try {
             const treeNodes = this.validateModuleGraph();
 
-            const processor = new Tree.SequentialParallel();
+            const processor = new SequentialParallel();
             const startNode = processor.createComposite(treeNodes[0])
 
             this.props.onValidated(startNode.getRepresentation());
