@@ -28,7 +28,7 @@ class ModuleGraphRules extends React.Component {
                     this.state.rules.map((rule, index) => (
                         <ListItem button key={index}>
                             <ListItemIcon>
-                                <CheckRoundedIcon />
+                                <CheckRoundedIcon color="secondary" />
                             </ListItemIcon>
                             <ListItemText primary={rule} />
                         </ListItem>

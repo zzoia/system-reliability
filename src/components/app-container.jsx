@@ -10,7 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import Graph from './graph';
 import ModuleGraphRules from './module-graph-rules';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import ReactJson from 'react-json-view'
+import SystemJsonView from './system-json-view';
 
 const theme = createMuiTheme({
     palette: {
@@ -29,7 +29,7 @@ const theme = createMuiTheme({
     },
 });
 
-const drawerWidth = 500;
+const drawerWidth = 400;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -37,7 +37,11 @@ const useStyles = makeStyles(theme => ({
         height: "100%"
     },
     appBar: {
-        zIndex: theme.zIndex.drawer + 1
+        zIndex: theme.zIndex.drawer + 1,
+        transition: theme.transitions.create(['margin', 'width'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        })
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -56,7 +60,6 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center',
         padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
         ...theme.mixins.toolbar,
         justifyContent: 'flex-end',
     },
@@ -77,39 +80,51 @@ export default function AppContainer() {
 
     const [json, setJson] = useState(0);
 
+    const [open, setOpen] = React.useState(false);
+
+    const openJsonView = (json) => {
+        if (!json) {
+            setOpen(false);
+        } else {
+            setJson(json);
+            setOpen(true);
+        }
+    }
+
     return (
         <ThemeProvider theme={theme}>
             <div className={classes.root}>
                 <CssBaseline />
                 <AppBar
                     position="fixed"
-                    className={clsx(classes.appBar)}>
+                    className={clsx(classes.appBar, {
+                        [classes.appBarShift]: open,
+                    })}>
                     <Toolbar>
                         <Typography variant="h6" noWrap>
                             Reliability of System
                         </Typography>
                     </Toolbar>
                 </AppBar>
+                <SystemJsonView open={open} json={json} />
+                <main className={clsx(classes.content)}>
+                    <div className={classes.drawerHeader} />
+                    <Graph onValidated={openJsonView} />
+                </main>
                 <Drawer
                     className={classes.drawer}
                     variant="permanent"
-                    anchor="left"
+                    anchor="right"
                     open={true}
                     classes={{
                         paper: classes.drawerPaper,
                     }}>
                     <div className={classes.drawerHeader}>
-                        Menu
                     </div>
                     <Divider />
                     <ModuleGraphRules />
-                    <ReactJson src={json} />
                     <Divider />
                 </Drawer>
-                <main className={clsx(classes.content)}>
-                    <div className={classes.drawerHeader} />
-                    <Graph onValidated={setJson} />
-                </main>
             </div>
         </ThemeProvider>
     );

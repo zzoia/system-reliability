@@ -1,132 +1,20 @@
 import * as React from 'react';
 
-import {
-    GraphView
-} from 'react-digraph';
+import { GraphView } from 'react-digraph';
 
 import GraphConfig, {
     EMPTY_EDGE_TYPE,
-    FORK_JOIN_NODE,
     NODE_KEY,
     SKINNY_TYPE,
-} from './graph-config';
+} from '../utils/graph-config';
 
-import * as Tree from './tree';
+import { DefaultSystemGarph, startNodeId, endNodeId, romanize } from '../utils/graph-data';
+
+import * as Tree from '../utils/tree';
 
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
-
-const startNodeId = "start";
-const endNodeId = "end";
-
-const sample = {
-    edges: [
-        {
-            source: startNodeId,
-            target: 'm1',
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: startNodeId,
-            target: 'm3',
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: startNodeId,
-            target: 'm5',
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: 'm1',
-            target: 'm2',
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: 'm3',
-            target: 'm4',
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: 'm5',
-            target: 'm6',
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: 'm2',
-            target: endNodeId,
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: 'm4',
-            target: endNodeId,
-            type: EMPTY_EDGE_TYPE,
-        },
-        {
-            source: 'm6',
-            target: endNodeId,
-            type: EMPTY_EDGE_TYPE,
-        }
-    ],
-    nodes: [
-        {
-            id: startNodeId,
-            title: "Fork",
-            x: 50,
-            y: 200,
-            type: FORK_JOIN_NODE
-        },
-        {
-            id: 'm1',
-            title: 'I',
-            type: SKINNY_TYPE,
-            x: 250,
-            y: 100,
-        },
-        {
-            id: 'm2',
-            title: 'II',
-            type: SKINNY_TYPE,
-            x: 500,
-            y: 100,
-        },
-        {
-            id: 'm3',
-            title: 'III',
-            type: SKINNY_TYPE,
-            x: 250,
-            y: 200,
-        },
-        {
-            id: 'm4',
-            title: 'IV',
-            type: SKINNY_TYPE,
-            x: 500,
-            y: 200,
-        },
-        {
-            id: 'm5',
-            title: 'V',
-            type: SKINNY_TYPE,
-            x: 250,
-            y: 300,
-        },
-        {
-            id: 'm6',
-            title: 'VI',
-            type: SKINNY_TYPE,
-            x: 500,
-            y: 300,
-        },
-        {
-            id: endNodeId,
-            title: "Join",
-            x: 700,
-            y: 200,
-            type: FORK_JOIN_NODE
-        }
-    ],
-};
 
 class Graph extends React.Component {
     GraphView;
@@ -136,7 +24,7 @@ class Graph extends React.Component {
 
         this.state = {
             copiedNode: null,
-            graph: sample,
+            graph: DefaultSystemGarph,
             selected: null,
             snackbar: null
         };
@@ -195,9 +83,12 @@ class Graph extends React.Component {
     onCreateNode = (x, y) => {
         const graph = this.state.graph;
 
+        const ids = graph.nodes.filter(n => !isNaN(n.id)).map(n => n.id);
+        const newId = Math.max(...ids) + 1;
+
         const viewNode = {
-            id: Date.now(),
-            title: '',
+            id: newId,
+            title: romanize(newId),
             type: SKINNY_TYPE,
             x,
             y,
@@ -324,168 +215,27 @@ class Graph extends React.Component {
 
         const treeBuilder = new Tree.TreeBuilder();
 
-        edges.filter(edge => edge.target !== endNodeId)
-            .forEach(edge => treeBuilder.fromEdge(edge));
+        edges.forEach(edge => treeBuilder.fromEdge(edge));
 
         const validator = new Tree.DepthFirstSearchTreeValidator(treeBuilder);
         const treeNodes = validator.validate();
 
-        const nodes = this.state.graph.nodes.filter(node => node[NODE_KEY] !== endNodeId);
+        const nodes = this.state.graph.nodes;
         nodes.forEach(node => {
             if (!treeNodes.some(treeNode => treeNode.id === node[NODE_KEY])) {
                 throw Error("Не всі вершини з'єднані: з'єднайте їх або видаліть");
             }
         });
 
-        const lastModule = new Tree.SingleModule(endNodeId);
-        treeNodes.filter(node => !node.children.length).forEach(node => {
-            if (!edges.some(edge => edge.source === node.id && edge.target === endNodeId)) {
-                throw new Error("Не всі останні вузли приєднані до кінцевого вузла");
-            }
-
-            node.children.push(lastModule);
-            lastModule.parents.push(node);
-        });
-
-        treeNodes.push(lastModule);
         return treeNodes;
-    }
-
-    mergeParallel = (subModule) => {
-
-        subModule.isVisitedByMergeSequantial = false;
-        if (subModule.isVisitedByMergeParallel) return;
-        subModule.isVisitedByMergeParallel = true;
-
-        const children = subModule.children;
-        if (children.length <= 1) {
-            return;
-        }
-
-        if (children.length === 1) {
-            this.mergeParallel(subModule.children[0]);
-            return;
-        }
-
-        let commonGrandChildren = [];
-        children.forEach((child, childIndex) => {
-            if (child.children.length === 1) {
-                const onlyChild = child.children[0];
-                const found = commonGrandChildren.find(common => common.grandChild.equalsTo(onlyChild));
-
-                if (found) {
-                    found.childIndices.push(childIndex);
-                } else {
-                    commonGrandChildren.push({
-                        childIndices: [childIndex],
-                        grandChild: onlyChild
-                    });
-                }
-            }
-        });
-
-        commonGrandChildren = commonGrandChildren.filter(common => common.childIndices.length > 1);
-        if (commonGrandChildren.length) {
-
-            commonGrandChildren.forEach(common => {
-
-                const childrenToMerge = common.childIndices.map(index => {
-                    const currentChild = children[index];
-
-                    currentChild.parents = [];
-                    currentChild.children = [];
-
-                    subModule.children = subModule.children.filter(child => !child.equalsTo(currentChild));
-                    common.grandChild.parents = common.grandChild.parents.filter(parent => !parent.equalsTo(currentChild));
-
-                    return currentChild;
-                });
-
-                const newModule = new Tree.ModuleCollection("or", childrenToMerge);
-                newModule.children = [common.grandChild];
-                newModule.parents = [subModule];
-
-                subModule.children.push(newModule);
-                common.grandChild.parents.push(newModule);
-
-                this.mergeParallel(common.grandChild);
-            });
-
-        } else {
-
-            children.forEach(child => this.mergeParallel(child));
-        }
-    }
-
-    hasOneChildWithOneParent(subModule) {
-        return subModule.children.length === 1 && subModule.children[0].parents.length === 1;
-    }
-
-    mergeSequential = (subModule) => {
-
-        subModule.isVisitedByMergeParallel = false;
-        if (subModule.isVisitedByMergeSequantial) return subModule;
-        subModule.isVisitedByMergeSequantial = true;
-
-        if (!subModule.children.length) {
-            if (subModule.id !== endNodeId) {
-                throw Error("Модуль без нащадків не є кінцевим вузлом")
-            }
-
-            return subModule;
-        }
-
-        while (this.hasOneChildWithOneParent(subModule)) {
-
-            const child = subModule.children[0];
-            
-            if (subModule.dependency === "and") {
-
-                subModule.collection.push(child);
-                subModule.children = [];
-            } else {
-
-                let andSubSystem = new Tree.ModuleCollection("and", [subModule, child]);
-                subModule.parents.forEach(parent => {
-                    parent.children = parent.children.filter(sibling => !sibling.equalsTo(subModule));
-                    parent.children.push(andSubSystem);
-                    andSubSystem.parents.push(parent);
-                });
-                subModule.parents = [];
-                subModule.children = [];
-
-                subModule = andSubSystem;
-            }
-
-            child.children.forEach(grandChild => {
-                subModule.children.push(grandChild);
-
-                grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
-                grandChild.parents.push(subModule);
-            });
-
-            child.children = [];
-            child.parents = [];
-        }
-
-        const newChildren = []
-        subModule.children.forEach(child => {
-            newChildren.push(this.mergeSequential(child));
-        });
-
-        subModule.children = newChildren;
-        return subModule;
     }
 
     showValidationResult = () => {
         try {
             const treeNodes = this.validateModuleGraph();
-            let startNode = treeNodes[0];
 
-            do {
-                startNode = this.mergeSequential(startNode);
-                this.mergeParallel(startNode);
-            } while (startNode.children.length);
+            const processor = new Tree.SequentialParallel();
+            const startNode = processor.createComposite(treeNodes[0])
 
             this.props.onValidated(startNode.getRepresentation());
 
@@ -496,6 +246,8 @@ class Graph extends React.Component {
                     message: error.message
                 }
             });
+            
+            this.props.onValidated(null);
         }
     }
 
@@ -511,11 +263,6 @@ class Graph extends React.Component {
         return (
             <div id="graph">
                 <div className="graph-header">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={this.showValidationResult}>Перевірити надійність</Button>
-
                     <Button
                         variant="outlined"
                         color="primary"
@@ -539,6 +286,7 @@ class Graph extends React.Component {
                     onCreateEdge={this.onCreateEdge}
                     onSwapEdge={this.onSwapEdge}
                     onDeleteEdge={this.onDeleteEdge}
+                    showGraphControls={true}
                     onUndo={this.onUndo}
                     onCopySelected={this.onCopySelected}
                     onPasteSelected={this.onPasteSelected}
