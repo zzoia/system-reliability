@@ -1,0 +1,16 @@
+D:\Projects\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.csprojAssemblyReference.cache
+D:\Projects\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.AssemblyInfoInputs.cache
+D:\Projects\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.AssemblyInfo.cs
+D:\Projects\ConsoleApp\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.deps.json
+D:\Projects\ConsoleApp\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.dll
+D:\Projects\ConsoleApp\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.pdb
+D:\Projects\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.dll
+D:\Projects\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.pdb
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.deps.json
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.dll
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.pdb
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.csprojAssemblyReference.cache
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.AssemblyInfoInputs.cache
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.AssemblyInfo.cs
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.dll
+d:\Study\10 semester\Надійність\ConsoleApp\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.pdb

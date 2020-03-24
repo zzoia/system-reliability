@@ -1,0 +1,8 @@
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.Model.deps.json
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.Model.dll
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.Model.pdb
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.csprojAssemblyReference.cache
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.AssemblyInfoInputs.cache
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.AssemblyInfo.cs
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.dll
+d:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.pdb

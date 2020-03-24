@@ -1,0 +1,16 @@
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.exe
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.deps.json
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.runtimeconfig.json
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.runtimeconfig.dev.json
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.dll
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.pdb
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\EPPlus.dll
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\Newtonsoft.Json.dll
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.Model.dll
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\bin\Debug\netcoreapp3.0\ReliabilityModel.Model.pdb
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\obj\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.csprojAssemblyReference.cache
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\obj\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.AssemblyInfoInputs.cache
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\obj\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.AssemblyInfo.cs
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\obj\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.csproj.CopyComplete
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\obj\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.dll
+d:\Study\10 semester\Надійність\my-app\server\ConsoleApp\obj\Debug\netcoreapp3.0\ReliabilityModel.ConsoleApp.pdb
