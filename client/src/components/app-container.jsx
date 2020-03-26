@@ -3,14 +3,11 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Graph from './graph';
 import SystemProperties from './system-properties';
 import ModuleGraphRules from './module-graph-rules';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import AdjacencyList from './adjacency-list';
 import ValidatedJsonGraph from './validated-json-graph';
 
 import { DepthFirstSearchTreeValidator } from "../utils/depth-first-search-tree-validator";
@@ -19,25 +16,7 @@ import { SequentialParallel } from "../utils/sequential-parallel";
 import { startNodeId, endNodeId } from '../utils/graph-data';
 import { NODE_KEY } from '../utils/graph-config';
 
-import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
-
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            light: '#4b9fea',
-            main: '#1e88e5',
-            dark: '#155fa0',
-            contrastText: '#fff',
-        },
-        secondary: {
-            light: '#ff669a',
-            main: '#ff4081',
-            dark: '#b22c5a',
-            contrastText: '#fff',
-        },
-    },
-});
 
 const drawerWidth = 400;
 
@@ -45,13 +24,6 @@ const useStyles = makeStyles(theme => ({
     root: {
         display: 'flex',
         height: "100%"
-    },
-    appBar: {
-        zIndex: theme.zIndex.drawer + 1,
-        transition: theme.transitions.create(['margin', 'width'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        })
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -70,7 +42,7 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center',
         padding: theme.spacing(0, 1),
-        ...theme.mixins.toolbar,
+        height: "48px",
         justifyContent: 'flex-end',
     },
     content: {
@@ -89,7 +61,6 @@ export default function AppContainer() {
     const classes = useStyles();
 
     const [json, setJson] = useState(null);
-    const [adjacencyList, setAdjacencyList] = React.useState([]);
     const [systemModules, setSystemModules] = React.useState([]);
     const [validationMessage, setValidationMessage] = useState(null);
     const [topLevelModule, setTopLevelModule] = useState(null);
@@ -103,8 +74,8 @@ export default function AppContainer() {
             } else {
 
                 const rates = moduleRates.find(rate => rate.id === validModule.id);
-                validModule.failureRate = rates.failureRate;
-                validModule.recoveryRate = rates.recoveryRate;
+                validModule.failureRate = +rates.failureRate;
+                validModule.recoveryRate = +rates.recoveryRate;
             }
         });
     };
@@ -112,14 +83,15 @@ export default function AppContainer() {
     const investigate = async (moduleRates) => {
 
         setModuleRates(topLevelModule.members, moduleRates);
-        console.log(topLevelModule)
+
         const response = await fetch("http://localhost:53294/systemreliability/test", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(topLevelModule)
         });
 
-        setAdjacencyList(await response.json());
+        const jsonObject = JSON.stringify(await response.json());
+        localStorage.setItem("adjacencyList", jsonObject)
     };
 
     const validateModuleGraph = (graph) => {
@@ -175,51 +147,40 @@ export default function AppContainer() {
     }
 
     return (
-        <ThemeProvider theme={theme}>
-            <div className={classes.root}>
-                <CssBaseline />
-                <AppBar
-                    position="fixed"
-                    className={clsx(classes.appBar)}>
-                    <Toolbar>
-                        <Typography variant="h6" noWrap>
-                            Reliability of System
-                        </Typography>
-                    </Toolbar>
-                </AppBar>
-                <Drawer
-                    className={classes.drawer}
-                    variant="permanent"
-                    anchor="left"
-                    open={true}
-                    classes={{
-                        paper: classes.drawerPaper,
-                    }}>
-                    <div className={classes.drawerHeader}>
-                    </div>
-                    {validationMessage && <Alert severity="error">{validationMessage}</Alert>}
-                    <ValidatedJsonGraph json={json} />
-                </Drawer>
-                <main className={clsx(classes.content)}>
-                    <div className={classes.drawerHeader} />
-                    <Graph onChange={showValidationResult} />
-                </main>
-                <Drawer
-                    className={classes.drawer}
-                    variant="permanent"
-                    anchor="right"
-                    open={true}
-                    classes={{
-                        paper: classes.drawerPaper,
-                    }}>
-                    <div className={classes.drawerHeader}>
-                    </div>
-                    <ModuleGraphRules />
-                    <SystemProperties
-                        modules={systemModules}
-                        onInvestigate={investigate} />
-                </Drawer>
-            </div >
-        </ThemeProvider >
+        <div className={classes.root}>
+            <CssBaseline />
+            <Drawer
+                className={classes.drawer}
+                variant="permanent"
+                anchor="left"
+                open={true}
+                classes={{
+                    paper: classes.drawerPaper,
+                }}>
+                <div className={classes.drawerHeader}>
+                </div>
+                {validationMessage && <Alert severity="error">{validationMessage}</Alert>}
+                <ValidatedJsonGraph json={json} />
+            </Drawer>
+            <main className={clsx(classes.content)}>
+                <div className={classes.drawerHeader} />
+                <Graph onChange={showValidationResult} />
+            </main>
+            <Drawer
+                className={classes.drawer}
+                variant="permanent"
+                anchor="right"
+                open={true}
+                classes={{
+                    paper: classes.drawerPaper,
+                }}>
+                <div className={classes.drawerHeader}>
+                </div>
+                <ModuleGraphRules />
+                <SystemProperties
+                    modules={systemModules}
+                    onInvestigate={investigate} />
+            </Drawer>
+        </div >
     );
 }

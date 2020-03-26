@@ -17,7 +17,6 @@ import Divider from '@material-ui/core/Divider';
 
 const useStyles = makeStyles(theme => ({
     root: {
-        width: '100%',
         backgroundColor: theme.palette.background.paper,
     },
     nested: {
