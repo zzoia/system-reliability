@@ -17,12 +17,13 @@ export default function SystemProperties({ modules, onInvestigate }) {
 
     const classes = useStyles();
 
-    const mappedModules = modules.map(mod => ({ id: mod.id, failureRate: 0, recoveryRate: 0 }));
+    const mappedModules = modules.map(mod => ({ id: mod.id, failureRate: 0, recoveryRate: 0, left: 0 }));
 
     const setModule = (data) => {
         const toUpdate = mappedModules.find(currData => currData.id === data.id);
         toUpdate.failureRate = data.failureRate;
         toUpdate.recoveryRate = data.recoveryRate;
+        toUpdate.left = data.left;
     }
 
     const moduleEditors = modules.map((mod) => (

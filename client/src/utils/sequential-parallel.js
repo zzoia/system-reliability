@@ -1,5 +1,6 @@
 import { DEPENDENCY_TYPES } from "./constants";
 import { ModuleCollection } from "./module-collection";
+import { endNodeId } from "./graph-data";
 
 export class SequentialParallel {
 
@@ -10,8 +11,14 @@ export class SequentialParallel {
             this.mergeParallel(startNode);
         } while (startNode.children.length);
 
-        startNode.collection.pop();
         startNode.collection.shift();
+
+        const lastItem = startNode.collection[startNode.collection.length - 1];
+        if (lastItem.collection) {
+            lastItem.collection = lastItem.collection.filter(item => item.id !== endNodeId);
+        } else {
+            startNode.collection.pop();
+        }
 
         return startNode;
     }
@@ -87,7 +94,7 @@ export class SequentialParallel {
     }
 
     mergeSequential = (subModule) => {
-        
+
         subModule.isVisitedByMergeParallel = false;
         if (subModule.isVisitedByMergeSequantial)
             return subModule;
@@ -135,7 +142,7 @@ export class SequentialParallel {
         subModule.children.forEach(child => {
             newChildren.push(this.mergeSequential(child));
         });
-        
+
         subModule.children = newChildren;
         return subModule;
     };

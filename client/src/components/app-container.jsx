@@ -3,8 +3,6 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import Graph from './graph';
 import SystemProperties from './system-properties';
 import ModuleGraphRules from './module-graph-rules';
@@ -18,7 +16,7 @@ import { NODE_KEY } from '../utils/graph-config';
 
 import Alert from '@material-ui/lab/Alert';
 
-const drawerWidth = 400;
+const drawerWidth = 462;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -35,8 +33,15 @@ const useStyles = makeStyles(theme => ({
         width: drawerWidth,
         flexShrink: 0,
     },
+    drawerJson: {
+        width: "400px",
+        flexShrink: 0,
+    },
     drawerPaper: {
         width: drawerWidth,
+    },
+    drawerPaperJson: {
+        width: "400px"
     },
     drawerHeader: {
         display: 'flex',
@@ -76,6 +81,7 @@ export default function AppContainer() {
                 const rates = moduleRates.find(rate => rate.id === validModule.id);
                 validModule.failureRate = +rates.failureRate;
                 validModule.recoveryRate = +rates.recoveryRate;
+                validModule.left = +rates.left;
             }
         });
     };
@@ -150,12 +156,12 @@ export default function AppContainer() {
         <div className={classes.root}>
             <CssBaseline />
             <Drawer
-                className={classes.drawer}
+                className={classes.drawerJson}
                 variant="permanent"
                 anchor="left"
                 open={true}
                 classes={{
-                    paper: classes.drawerPaper,
+                    paper: classes.drawerPaperJson,
                 }}>
                 <div className={classes.drawerHeader}>
                 </div>

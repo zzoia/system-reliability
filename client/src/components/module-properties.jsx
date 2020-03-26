@@ -25,10 +25,11 @@ export default function ModuleProperties({ moduleData, onChange }) {
 
   const [recoveryRate, setRecoveryRate] = useState(0);
   const [failureRate, setFailureRate] = useState(0);
+  const [left, setLeft] = useState(0);
 
   const updateField = (fieldSetter) => {
     return (event) => {
-      onChange({ id: moduleData[NODE_KEY], failureRate, recoveryRate });
+      onChange({ id: moduleData[NODE_KEY], failureRate, recoveryRate, left });
       fieldSetter(event.target.value);
     }
   }
@@ -55,6 +56,19 @@ export default function ModuleProperties({ moduleData, onChange }) {
         InputProps={{
           inputProps: {
             step: 0.01
+          }
+        }}
+        type="number" />
+      <TextField
+        required
+        label="Оновлення"
+        value={left}
+        onChange={updateField(setLeft)}
+        InputProps={{
+          inputProps: {
+            step: 1,
+            min: -1,
+            max: 5
           }
         }}
         type="number" />

@@ -48,7 +48,7 @@ namespace ReliabilityModel.Api.Controllers
             ModuleType.Single => new SingleModuleSystemRequest
             {
                 FailureRate = hybridRequest.FailureRate,
-                Left = hybridRequest.Left,
+                Left = hybridRequest.Left == -1 ? (int?) null : hybridRequest.Left,
                 ModuleName = hybridRequest.ModuleName,
                 RecoveryRate = hybridRequest.RecoveryRate
             },
