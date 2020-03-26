@@ -2,8 +2,8 @@
 
 namespace ReliabilityModel.Model.Requests
 {
-    public class SystemRequest
+    public abstract class SystemRequest
     {
-        public ReliabilityDependency Dependency { get; set; }
+        public abstract System.System ToSystem();
     }
 }

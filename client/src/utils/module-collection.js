@@ -31,7 +31,7 @@ export class ModuleCollection extends SubSystem {
     }
 
     getRepresentation() {
-        
+
         if (this.collection.length === 1) {
             return this.collection[0].getRepresentation();
         }
@@ -44,7 +44,31 @@ export class ModuleCollection extends SubSystem {
         return {
             [this.dependency]: representation
         };
+    }
 
+    toRequest(nodes) {
+
+        if (this.collection.length === 1) {
+            return this.collection[0].toRequest(nodes);
+        }
+
+        const members = [];
+        this.collection.forEach(item => {
+            members.push(item.toRequest(nodes));
+        });
+
+        return {
+            dependency: this.dependency,
+            members,
+
+            type: "multiple",
+
+            id: null,
+            moduleName: null,
+            failureRate: 0,
+            recoveryRate: 0,
+            left: 0
+        };
     }
 
 }

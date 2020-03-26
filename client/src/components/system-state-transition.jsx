@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
 export default function SystemStateTransition({ transition }) {
 
     const classes = useStyles();
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = React.useState(false);
 
     const handleClick = () => {
         setOpen(!open);

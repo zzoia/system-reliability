@@ -8,16 +8,7 @@ import GraphConfig, {
     SKINNY_TYPE,
 } from '../utils/graph-config';
 
-import { DefaultSystemGarph, startNodeId, endNodeId, romanize } from '../utils/graph-data';
-
-import { DepthFirstSearchTreeValidator } from "../utils/depth-first-search-tree-validator";
-import { TreeBuilder } from "../utils/tree-builder";
-import { SequentialParallel } from "../utils/sequential-parallel";
-
-import Button from '@material-ui/core/Button';
-import Snackbar from '@material-ui/core/Snackbar';
-import Alert from '@material-ui/lab/Alert';
-
+import { DefaultSystemGarph as DefaultSystemGraph, startNodeId, endNodeId, romanize } from '../utils/graph-data';
 class Graph extends React.Component {
     GraphView;
 
@@ -26,12 +17,18 @@ class Graph extends React.Component {
 
         this.state = {
             copiedNode: null,
-            graph: DefaultSystemGarph,
-            selected: null,
-            snackbar: null
+            graph: DefaultSystemGraph,
+            selected: null
         };
 
         this.GraphView = React.createRef();
+    }
+
+    getModuleGraph() {
+        return {
+            nodes: [...this.state.graph.nodes],
+            edges: [...this.state.graph.edges]
+        }
     }
 
     // Helper to find the index of a given node
@@ -98,6 +95,8 @@ class Graph extends React.Component {
 
         graph.nodes = [...graph.nodes, viewNode];
         this.setState({ graph });
+
+        this.props.onChange(this.getModuleGraph());
     };
 
     // Deletes a node from the graph
@@ -114,6 +113,8 @@ class Graph extends React.Component {
         graph.edges = newEdges;
 
         this.setState({ graph, selected: null });
+
+        this.props.onChange(this.getModuleGraph());
     };
 
     // Creates a new node between two edges
@@ -134,6 +135,8 @@ class Graph extends React.Component {
                 selected: viewEdge,
             });
         }
+
+        this.props.onChange(this.getModuleGraph());
     };
 
     // Called when an edge is reattached to a different target.
@@ -156,6 +159,8 @@ class Graph extends React.Component {
             graph,
             selected: edge,
         });
+
+        this.props.onChange(this.getModuleGraph());
     };
 
     // Called when an edge is deleted
@@ -167,6 +172,8 @@ class Graph extends React.Component {
             graph,
             selected: null,
         });
+
+        this.props.onChange(this.getModuleGraph());
     };
 
     onUndo = () => {
@@ -204,52 +211,9 @@ class Graph extends React.Component {
 
     canDeleteNode = (node) => node[NODE_KEY] !== startNodeId && node[NODE_KEY] !== endNodeId;
 
-    validateModuleGraph = () => {
-        const edges = this.state.graph.edges;
-        if (edges.some(edge => edge.target === startNodeId || edge.source === endNodeId)) {
-            throw Error("Існують ребра, які входять в початковий вузол або, які виходять із кінцевого");
-        }
-
-        const treeBuilder = new TreeBuilder();
-
-        edges.forEach(edge => treeBuilder.fromEdge(edge));
-
-        const validator = new DepthFirstSearchTreeValidator(treeBuilder);
-        const treeNodes = validator.validate();
-
-        const nodes = this.state.graph.nodes;
-        nodes.forEach(node => {
-            if (!treeNodes.some(treeNode => treeNode.id === node[NODE_KEY])) {
-                throw Error("Не всі вершини з'єднані: з'єднайте їх або видаліть");
-            }
-        });
-
-        return treeNodes;
-    }
-
-    showValidationResult = () => {
-        try {
-            const treeNodes = this.validateModuleGraph();
-
-            const processor = new SequentialParallel();
-            const startNode = processor.createComposite(treeNodes[0])
-
-            this.props.onValidated(startNode.getRepresentation());
-
-        } catch (error) {
-            this.setState({
-                snackbar: {
-                    success: false,
-                    message: error.message
-                }
-            });
-
-            this.props.onValidated(null);
-        }
-    }
-
-    handleClose = () => {
-        this.setState({ snackbar: null });
+    setGraphRef = (el) => {
+        this.GraphView = el;
+        this.props.onChange(this.getModuleGraph());
     }
 
     render() {
@@ -259,14 +223,8 @@ class Graph extends React.Component {
 
         return (
             <div id="graph">
-                <div className="graph-header">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={this.showValidationResult}>{"Перевірити & Формалізувати"}</Button>
-                </div>
                 <GraphView
-                    ref={el => (this.GraphView = el)}
+                    ref={this.setGraphRef}
                     nodeKey={NODE_KEY}
                     nodes={nodes}
                     edges={edges}
@@ -289,22 +247,6 @@ class Graph extends React.Component {
                     onPasteSelected={this.onPasteSelected}
                     layoutEngineType="SnapToGrid"
                 />
-                <Snackbar
-                    open={!!this.state.snackbar}
-                    autoHideDuration={6000}
-                    onClose={this.handleClose}
-                    anchorOrigin={{ vertical: "top", horizontal: "center" }}>
-
-                    <Alert
-                        elevation={6}
-                        variant="filled"
-                        onClose={this.handleClose}
-                        severity={this.state.snackbar?.success ? "success" : "error"}>
-
-                        {this.state.snackbar?.message}
-                    </Alert>
-
-                </Snackbar>
             </div>
         );
     }

@@ -1,4 +1,6 @@
 import { Node } from "./node";
+import { NODE_KEY } from './graph-config';
+import { startNodeId, endNodeId } from './graph-data';
 
 export class TreeBuilder {
 
@@ -9,7 +11,7 @@ export class TreeBuilder {
     fromEdge({ source, target }) {
         const fromNode = this.getOrAddNode(source);
         const toNode = this.getOrAddNode(target);
-        
+
         fromNode.addChild(toNode);
         toNode.addParent(fromNode);
     }
@@ -43,6 +45,23 @@ export class TreeBuilder {
         }
 
         return root;
+    }
+
+    validateDanglingNodes() {
+
+        this.nodes.forEach(treeNode => {
+            const hasNoChildren = !treeNode.children.length && treeNode[NODE_KEY] !== endNodeId;
+            const hasNoParents = !treeNode.parents.length && treeNode[NODE_KEY] !== startNodeId;
+
+            if (hasNoChildren || hasNoParents) {
+                throw { id: treeNode[NODE_KEY] };
+            }
+        });
+
+    }
+
+    hasNodeWithId(id) {
+        return this.nodes.some(treeNode => treeNode[NODE_KEY] === id);
     }
 
 }

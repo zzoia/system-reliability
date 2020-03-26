@@ -28,6 +28,10 @@ export default function AdjacencyList({ open, adjacencyList }) {
         <SystemStateTransition key={index} transition={adj} />
     ));
 
+    if (!adjacencyList.length) {
+        return (<div />);
+    }
+
     return (
         <Drawer
             className={classes.drawer}

@@ -1,7 +1,7 @@
 import { SubSystem } from "./sub-system";
 
 export class SingleModule extends SubSystem {
-    
+
     constructor(id) {
         super();
         this.id = id;
@@ -15,4 +15,19 @@ export class SingleModule extends SubSystem {
         return this.id;
     }
 
+    toRequest(nodes) {
+        const me = nodes.find(node => node.id === this.id);
+        return {
+            dependency: null,
+            members: [],
+
+            type: "single",
+
+            id: this.id,
+            moduleName: me.title,
+            failureRate: 0,
+            recoveryRate: 0,
+            left: 0
+        };
+    }
 }
