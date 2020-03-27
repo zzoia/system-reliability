@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using Microsoft.Research.Oslo;
 using ReliabilityModel.Model;
 using ReliabilityModel.Model.Formatters;
 using ReliabilityModel.Model.System;
@@ -12,6 +14,20 @@ namespace ConsoleApp
 	{
 		public static void Main(string[] args)
         {
+            var sol = Ode.RK547M(0, new Vector(5, 1), (t, x) =>
+              {
+                  var result = new double[2];
+                  result[0] = x[0] - x[0] * x[1];
+                  result[1] = -x[1] + x[0] * x[1];
+                  return new Vector(result);
+              });
+
+
+            var points = sol.SolveFromToStep(0, 20, 1).ToArray();
+            foreach (var sp in points)
+                Console.WriteLine("{0}\t{1}", sp.T, sp.X);
+
+            return;
             var m1 = new SingleModuleSystem("I",  1);
             var m2 = new SingleModuleSystem("II");
             var m3 = new SingleModuleSystem("III");

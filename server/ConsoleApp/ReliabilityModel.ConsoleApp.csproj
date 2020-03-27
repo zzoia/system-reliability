@@ -14,4 +14,10 @@
     <ProjectReference Include="..\ReliabilityModel\ReliabilityModel.Model.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Microsoft.Research.Oslo">
+      <HintPath>..\..\..\Oslo\Oslo\bin\Debug\Microsoft.Research.Oslo.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

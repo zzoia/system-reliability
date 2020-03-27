@@ -1,66 +1,69 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdjacencyList from './adjacency-list';
 import { makeStyles } from '@material-ui/core/styles';
 import StateGraph from './state-graph';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const useStyles = makeStyles(theme => ({
     container: {
         display: "flex",
         height: "inherit",
-        alignItems: "stretch"
+        alignItems: "stretch",
+        marginTop: "48px"
+    },
+    settings: {
+        flexShrink: 0
     }
 }));
 
-export default function ReliabilityModelContainer() {
-
-    const classes = useStyles();
-
-    let adjacencyList = localStorage.getItem("adjacencyList")
-    if (!adjacencyList) return (<div />);
-
-    adjacencyList = JSON.parse(adjacencyList);
-
-    const modulesToLabel = (modules) => {
-        let result = ""
-        modules.forEach(moduleState => {
-            result += moduleState.name;
-            if (!isNaN(moduleState.left) && !moduleState.isWorking) {
-                result += `(${moduleState.left})`;
-            } else if (!moduleState.isWorking) {
-                result += "(-)";
-            }
-
-            result += " ";
-        });
-        return result.substring(0, result.length - 1);
-    }
-
-    const statesToColor = (status) => {
-        switch (status) {
-            case "working":
-                return "#16b580"
-            case "waitingRecovery":
-                return "#ebcf34"
-            case "terminal":
-                return "#ff4800"
-            default:
-                break;
+const modulesToLabel = (modules) => {
+    let result = ""
+    modules.forEach(moduleState => {
+        result += moduleState.name;
+        if (moduleState.left !== null) {
+            result += `(${moduleState.left})`;
         }
+
+        if (!moduleState.isWorking) {
+            result += "(-)";
+        }
+
+        result += " ";
+    });
+    return result.substring(0, result.length - 1);
+}
+
+const statesToColor = (status) => {
+    switch (status) {
+        case "working":
+            return "#16b580";
+        case "waitingRecovery":
+            return "#ebcf34";
+        case "terminal":
+            return "#ff4800";
+        default:
+            break;
     }
+}
 
+const getGraph = (adjacencyList, includeTerminal) => {
     const graphLinks = [];
-    const graphNodes = adjacencyList.map(node => {
+    let graphNodes = adjacencyList.map(node => {
         const id = modulesToLabel(node.fromState.moduleStates);
-        node.toStates.forEach(toState => {
 
-            const label = toState.isRecovering ? `${toState.withRate}, μ` : `${toState.withRate}, λ`;
+        if (includeTerminal || node.fromState.status !== "terminal") {
+            node.toStates.forEach(toState => {
 
-            graphLinks.push({
-                source: id,
-                target: modulesToLabel(toState.toState.moduleStates),
-                label
+                const label = toState.isRecovering ? `${toState.withRate}, μ` : `${toState.withRate}, λ`;
+
+                graphLinks.push({
+                    source: id,
+                    target: modulesToLabel(toState.toState.moduleStates),
+                    label
+                });
             });
-        });
+        }
         return {
             id,
             strokeColor: statesToColor(node.fromState.status),
@@ -68,9 +71,47 @@ export default function ReliabilityModelContainer() {
         };
     });
 
+    graphNodes = graphNodes.filter(node => graphLinks.some(link => link.source === node.id || link.target === node.id));
+
+    return {
+        nodes: graphNodes,
+        links: graphLinks
+    };
+}
+
+export default function ReliabilityModelContainer() {
+
+    let adjacencyList = localStorage.getItem("adjacencyList");
+
+    const classes = useStyles();
+    const [includeTerminal, setIncludeTerminal] = useState(false);
+
+    adjacencyList = JSON.parse(adjacencyList);
+    const [graphData, setGraphData] = useState(getGraph(adjacencyList, includeTerminal));
+
+    const handleGraphFilter = (event) => {
+        const include = event.target.checked;
+        setIncludeTerminal(include);
+
+        setGraphData(getGraph(adjacencyList, include))
+    }
+
     return (
         <div className={classes.container}>
-            <StateGraph stateGraph={{ nodes: graphNodes, links: graphLinks }} />
+            <div className={classes.settings}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={includeTerminal}
+                            onChange={handleGraphFilter}
+                            name="checkedB"
+                            color="primary"
+                        />
+                    }
+                    label="Непрацездатні стани"
+                />
+            </div>
+            <StateGraph stateGraph={graphData} />
             <AdjacencyList adjacencyList={adjacencyList} />
         </div>
     );

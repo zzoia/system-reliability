@@ -5,7 +5,6 @@ import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
     container: {
-        marginTop: "48px",
         overflow: "auto",
         display: "flex",
         flexDirection: "column",

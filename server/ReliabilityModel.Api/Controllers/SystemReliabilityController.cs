@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using ReliabilityModel.Model;
@@ -24,11 +25,7 @@ namespace ReliabilityModel.Api.Controllers
                 return BadRequest();
             }
 
-            var systemReques = HybridToSystemRequest(hybridRequest);
-            var system = (MultipleModuleSystem) systemReques.ToSystem();
-
-            var systemStateGraph = new SystemStateGraph(system);
-
+            SystemStateGraph systemStateGraph = ToSystemStateGraph(hybridRequest);
             var result = systemStateGraph.Transitions.Select(transition => new AdjacencyModel
             {
                 FromState = ToModel(transition.SystemState),
@@ -36,6 +33,30 @@ namespace ReliabilityModel.Api.Controllers
             });
 
             return Ok(result);
+        }
+
+        [HttpPost("plot")]
+        public IActionResult GetPlot(double from, 
+            double to, 
+            double step, 
+            [FromBody] HybridSystemRequest hybridRequest)
+        {
+            if (hybridRequest.Type != ModuleType.Multiple)
+            {
+                return BadRequest();
+            }
+
+            SystemStateGraph system = ToSystemStateGraph(hybridRequest);
+            var plotData = system.GetProbability(from, to, step);
+
+            return Ok(plotData);
+        }
+
+        private static SystemStateGraph ToSystemStateGraph(HybridSystemRequest systemRequest)
+        {
+            var systemReques = HybridToSystemRequest(systemRequest);
+            var system = (MultipleModuleSystem)systemReques.ToSystem();
+            return new SystemStateGraph(system);
         }
 
         private static SystemRequest HybridToSystemRequest(HybridSystemRequest hybridRequest) => hybridRequest.Type switch

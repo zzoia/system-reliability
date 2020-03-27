@@ -4,4 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Microsoft.Research.Oslo">
+      <HintPath>..\..\..\Oslo\Oslo\bin\Debug\Microsoft.Research.Oslo.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

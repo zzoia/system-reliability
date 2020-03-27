@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Research.Oslo;
 using ReliabilityModel.Model.System;
 
 namespace ReliabilityModel.Model
@@ -52,7 +53,7 @@ namespace ReliabilityModel.Model
 
         public double[,] BuildWeightMatrix()
         {
-            var adjacencyMatrix = new double[AllPossibleStates.Count, AllPossibleStates.Count];
+            var equations = new double[AllPossibleStates.Count, AllPossibleStates.Count];
             for (var fromStateIdx = 0; fromStateIdx < AllPossibleStates.Count; fromStateIdx++)
             {
                 SystemState currentState = AllPossibleStates[fromStateIdx];
@@ -69,12 +70,45 @@ namespace ReliabilityModel.Model
                 {
                     int toStateIdx = _allPossibleStates.IndexOf(nextState.ToSystemState);
 
-                    adjacencyMatrix[fromStateIdx, toStateIdx] -= nextState.WithRate;
-                    adjacencyMatrix[toStateIdx, fromStateIdx] += nextState.WithRate;
+                    equations[fromStateIdx, toStateIdx] -= nextState.WithRate;
+                    equations[toStateIdx, fromStateIdx] += nextState.WithRate;
                 }
             }
 
-            return adjacencyMatrix;
+            return equations;
+        }
+
+        public IReadOnlyList<WorkingProbability> GetProbability(double from, double to, double step)
+        {
+            double[,] equations = BuildWeightMatrix();
+
+            var initial = new Vector(Enumerable.Repeat(1.0, AllPossibleStates.Count).ToArray());
+            var solution = Ode.RK547M(0, initial, (_, vector) =>
+            {
+                double[] result = new double[vector.Length];
+                for (var state = 0; state < result.Length; state++)
+                {
+                    result[state] = 0;
+                    for (var component = 0; component < result.Length; component++)
+                    {
+                        result[state] += equations[state, component];
+                    }
+                }
+                return new Vector(result);
+            });
+
+            int[] workingIndices = AllPossibleStates
+                .Select((state, index) => new { index, state.IsWorking })
+                .Where(state => state.IsWorking)
+                .Select(state => state.index)
+                .ToArray();
+
+            var points = solution.SolveFromToStep(from, to, step).ToArray();
+            return points.Select(point => new WorkingProbability
+            {
+                Time = point.T,
+                AggregatedProbability = point.X.ToArray().Where((_, index) => workingIndices.Contains(index)).Sum()
+            }).ToList();
         }
 
         private IList<SystemState> GetAllPossibleStates()

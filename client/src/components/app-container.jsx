@@ -86,7 +86,7 @@ export default function AppContainer() {
         });
 
         const jsonObject = JSON.stringify(await response.json());
-        localStorage.setItem("adjacencyList", jsonObject)
+        localStorage.setItem("adjacencyList", jsonObject);
     };
 
     const showValidationResult = (graph) => {

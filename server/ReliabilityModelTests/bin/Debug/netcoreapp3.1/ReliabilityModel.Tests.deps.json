@@ -1347,6 +1347,14 @@
         "runtime": {
           "ReliabilityModel.Model.dll": {}
         }
+      },
+      "Microsoft.Research.Oslo/1.0.0.0": {
+        "runtime": {
+          "Microsoft.Research.Oslo.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -2051,6 +2059,11 @@
     },
     "ReliabilityModel.Model/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Research.Oslo/1.0.0.0": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }

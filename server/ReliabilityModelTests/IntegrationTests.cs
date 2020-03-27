@@ -10,6 +10,40 @@ namespace ReliabilityModel.Tests
     public class IntegrationTests
     {
         [Fact]
+        public void GetProbability_ThreeModulesNoRecovery_Calculates()
+        {
+            // Arrange
+            var system = new MultipleModuleSystem(
+                new List<Model.System.System>
+                {
+                    new SingleModuleSystem("I", 0){
+                    FailureRate = 0.0001
+                    },
+                    new SingleModuleSystem("II", 0)
+                    {
+                        FailureRate = 0.0002
+                    },
+                    new SingleModuleSystem("III", 0){FailureRate=0.0003}
+                }, ReliabilityDependency.And);
+            const string expected = @"0 -> 1!, 2!, 4!
+1! -> 3!, 5!
+2! -> 3!, 6!
+3! -> 7!
+4! -> 5!, 6!
+5! -> 7!
+6! -> 7!
+7! -> 
+";
+
+            // Act
+            var sut = new SystemStateGraph(system);
+            IReadOnlyList<WorkingProbability> actual = sut.GetProbability(0, 1000, 50);
+
+            // Assert
+            //Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public void SystemStateGraphCtor_ThreeModulesFirstOneRecovery_BuildsGraph()
         {
             // Arrange

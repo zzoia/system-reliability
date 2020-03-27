@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -27,12 +27,11 @@ export default function ModuleProperties({ moduleData, onChange }) {
   const [failureRate, setFailureRate] = useState(0);
   const [left, setLeft] = useState(0);
 
-  const updateField = (fieldSetter) => {
-    return (event) => {
-      onChange({ id: moduleData[NODE_KEY], failureRate, recoveryRate, left });
-      fieldSetter(event.target.value);
-    }
-  }
+  useEffect(() => {
+    onChange({ id: moduleData[NODE_KEY], failureRate, recoveryRate, left });
+  }, [recoveryRate, failureRate, left]);
+
+  const updateField = (fieldSetter) => (event) => fieldSetter(event.target.value);
 
   return (
     <form className={classes.root} noValidate autoComplete="off">
