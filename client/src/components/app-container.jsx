@@ -11,7 +11,7 @@ import ValidatedJsonGraph from './validated-json-graph';
 import { DepthFirstSearchTreeValidator } from "../utils/depth-first-search-tree-validator";
 import { TreeBuilder } from "../utils/tree-builder";
 import { SequentialParallel } from "../utils/sequential-parallel";
-import { startNodeId, endNodeId } from '../utils/graph-data';
+import { DefaultSystemGraph, startNodeId, endNodeId } from '../utils/graph-data';
 import { NODE_KEY } from '../utils/graph-config';
 
 import Alert from '@material-ui/lab/Alert';
@@ -70,21 +70,10 @@ export default function AppContainer() {
     const [validationMessage, setValidationMessage] = useState(null);
     const [topLevelModule, setTopLevelModule] = useState(null);
 
-    const setModuleRates = (validatedModules, moduleRates) => {
-        validatedModules.forEach(validModule => {
+    const storageGraph = localStorage.getItem("graph");
+    const currentGraph = storageGraph ? JSON.parse(storageGraph) : DefaultSystemGraph;
 
-            if (validModule.members.length) {
-
-                setModuleRates(validModule.members, moduleRates);
-            } else {
-
-                const rates = moduleRates.find(rate => rate.id === validModule.id);
-                validModule.failureRate = +rates.failureRate;
-                validModule.recoveryRate = +rates.recoveryRate;
-                validModule.left = +rates.left;
-            }
-        });
-    };
+    const [currentSystemGraph, setCurrentSystemGraph] = useState(currentGraph);
 
     const investigate = async (moduleRates) => {
 
@@ -99,6 +88,28 @@ export default function AppContainer() {
         const jsonObject = JSON.stringify(await response.json());
         localStorage.setItem("adjacencyList", jsonObject)
     };
+
+    const showValidationResult = (graph) => {
+        try {
+            const treeNodes = validateModuleGraph(graph);
+
+            const processor = new SequentialParallel();
+            const startNode = processor.createComposite(treeNodes[0])
+
+            setJson(startNode.getRepresentation());
+            setValidationMessage(null);
+
+            localStorage.setItem("graph", JSON.stringify(currentSystemGraph));
+
+            setTopLevelModule(startNode.toRequest(graph.nodes));
+
+        } catch (error) {
+            setValidationMessage(error.message);
+            setJson(null);
+        }
+
+        setSystemModules(graph.nodes.filter(node => node.id !== endNodeId && node.id !== startNodeId));
+    }
 
     const validateModuleGraph = (graph) => {
 
@@ -130,27 +141,23 @@ export default function AppContainer() {
         }
 
         return treeNodes;
-    }
+    };
 
-    const showValidationResult = (graph) => {
-        try {
-            const treeNodes = validateModuleGraph(graph);
+    const setModuleRates = (validatedModules, moduleRates) => {
+        validatedModules.forEach(validModule => {
 
-            const processor = new SequentialParallel();
-            const startNode = processor.createComposite(treeNodes[0])
+            if (validModule.members.length) {
 
-            setJson(startNode.getRepresentation());
-            setValidationMessage(null);
+                setModuleRates(validModule.members, moduleRates);
+            } else {
 
-            setTopLevelModule(startNode.toRequest(graph.nodes));
-
-        } catch (error) {
-            setValidationMessage(error.message);
-            setJson(null);
-        }
-
-        setSystemModules(graph.nodes.filter(node => node.id !== endNodeId && node.id !== startNodeId));
-    }
+                const rates = moduleRates.find(rate => rate.id === validModule.id);
+                validModule.failureRate = +rates.failureRate;
+                validModule.recoveryRate = +rates.recoveryRate;
+                validModule.left = +rates.left;
+            }
+        });
+    };
 
     return (
         <div className={classes.root}>
@@ -170,7 +177,9 @@ export default function AppContainer() {
             </Drawer>
             <main className={clsx(classes.content)}>
                 <div className={classes.drawerHeader} />
-                <Graph onChange={showValidationResult} />
+                <Graph
+                    onChange={showValidationResult}
+                    value={currentSystemGraph} />
             </main>
             <Drawer
                 className={classes.drawer}

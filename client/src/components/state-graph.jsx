@@ -1,11 +1,6 @@
 import React from 'react';
 import { Graph } from "react-d3-graph";
 
-const data = {
-    nodes: [{ id: "1(1) 1 1" }, { id: "0(1) 1 1" }, { id: "1(1) 0 1" }, { id: "1(1) 1 0" }],
-    links: [{ source: "1(1) 1 1", target: "0(1) 1 1" }, { source: "1(1) 1 1", target: "1(1) 0 1" }, { source: "1(1) 1 1", target: "1(1) 1 0" }]
-};
-
 const config = {
     "automaticRearrangeAfterDropNode": false,
     "collapsible": false,
@@ -54,15 +49,15 @@ const config = {
         "type": "CURVE_SMOOTH",
         "color": "#d3d3d3",
         "fontColor": "black",
-        "fontSize": 8,
+        "fontSize": 12,
         "fontWeight": "normal",
         "highlightColor": "red",
-        "highlightFontSize": 8,
+        "highlightFontSize": 12,
         "highlightFontWeight": "normal",
         "labelProperty": "label",
         "mouseCursor": "pointer",
         "opacity": 1,
-        "renderLabel": false,
+        "renderLabel": true,
         "semanticStrokeWidth": false,
         "strokeWidth": 2.5,
         "markerHeight": 6,

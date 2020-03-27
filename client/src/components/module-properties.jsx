@@ -44,7 +44,8 @@ export default function ModuleProperties({ moduleData, onChange }) {
         onChange={updateField(setFailureRate)}
         InputProps={{
           inputProps: {
-            step: 0.0001
+            step: 0.0001,
+            min: 0
           }
         }}
         type="number" />
@@ -55,7 +56,8 @@ export default function ModuleProperties({ moduleData, onChange }) {
         onChange={updateField(setRecoveryRate)}
         InputProps={{
           inputProps: {
-            step: 0.01
+            step: 0.01,
+            min: 0
           }
         }}
         type="number" />

@@ -35,16 +35,36 @@ export default function ReliabilityModelContainer() {
         return result.substring(0, result.length - 1);
     }
 
+    const statesToColor = (status) => {
+        switch (status) {
+            case "working":
+                return "#16b580"
+            case "waitingRecovery":
+                return "#ebcf34"
+            case "terminal":
+                return "#ff4800"
+            default:
+                break;
+        }
+    }
+
     const graphLinks = [];
     const graphNodes = adjacencyList.map(node => {
         const id = modulesToLabel(node.fromState.moduleStates);
         node.toStates.forEach(toState => {
-            graphLinks.push({ source: id, target: modulesToLabel(toState.moduleStates) });
+
+            const label = toState.isRecovering ? `${toState.withRate}, μ` : `${toState.withRate}, λ`;
+
+            graphLinks.push({
+                source: id,
+                target: modulesToLabel(toState.toState.moduleStates),
+                label
+            });
         });
         return {
             id,
-            strokeColor: node.fromState.status === "working" ? "#16b580" : "#ff4800",
-            highlightColor: node.fromState.status === "working" ? "#16b580" : "#ff4800"
+            strokeColor: statesToColor(node.fromState.status),
+            highlightColor: statesToColor(node.fromState.status)
         };
     });
 

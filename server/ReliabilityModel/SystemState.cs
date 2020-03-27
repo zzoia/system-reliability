@@ -36,8 +36,9 @@ namespace ReliabilityModel.Model
 
         public int Index { get; }
 
-        public bool GetTransitionRate(SystemState anotherSystemState, out double transitionRate)
+        public bool GetTransitionRate(SystemState anotherSystemState, out double transitionRate, out bool isRecovering)
         {
+            isRecovering = false;
             transitionRate = 0;
 
             OneStateTransition transition = GetOneChangeTransition(anotherSystemState);
@@ -46,20 +47,15 @@ namespace ReliabilityModel.Model
                 return false;
             }
 
-            bool isRecovering = transition.From.IsValidStateChangeTo(transition.To)
+            isRecovering = transition.From.IsValidStateChangeTo(transition.To)
                    && !transition.From.IsWorking
                    && transition.To.IsWorking;
 
             transitionRate = isRecovering
                 ? transition.From.Module.RecoveryRate
                 : transition.From.Module.FailureRate;
-            return isRecovering;
-        }
 
-        public bool CanTransitTo(SystemState anotherSystemState)
-        {
-            OneStateTransition transitionPair = GetOneChangeTransition(anotherSystemState);
-            return transitionPair != null;
+            return true;
         }
 
         public override string ToString() => $"[{string.Join("", ModuleStates.Select(state => state.ToString()))}]";

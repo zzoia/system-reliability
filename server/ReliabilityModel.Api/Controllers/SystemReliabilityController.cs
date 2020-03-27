@@ -32,7 +32,7 @@ namespace ReliabilityModel.Api.Controllers
             var result = systemStateGraph.Transitions.Select(transition => new AdjacencyModel
             {
                 FromState = ToModel(transition.SystemState),
-                ToStates = transition.ToSystemStates.Select(ToModel)
+                ToStates = transition.ToSystemStates.Select(ToTransition)
             });
 
             return Ok(result);
@@ -54,6 +54,14 @@ namespace ReliabilityModel.Api.Controllers
             },
             _ => throw new ArgumentOutOfRangeException(),
         };
+
+        private static SystemStateTransitionModel ToTransition(SystemStateTransition transition)
+            => new SystemStateTransitionModel
+            {
+                ToState = ToModel(transition.ToSystemState),
+                IsRecovering = transition.IsRecovering,
+                WithRate = transition.WithRate
+            };
 
         private static SystemStateModel ToModel(SystemState systemState)
             => new SystemStateModel

@@ -32,10 +32,15 @@ namespace ReliabilityModel.Model
 
                 foreach (SystemState toState in AllPossibleStates)
                 {
-                    bool canTransitTo = fromState.CanTransitTo(toState);
+                    bool canTransitTo = fromState.GetTransitionRate(toState, out double rate, out bool isRecovering);
                     if (canTransitTo)
                     {
-                        transition.ToSystemStates.Add(toState);
+                        transition.ToSystemStates.Add(new SystemStateTransition
+                        {
+                            ToSystemState = toState,
+                            IsRecovering = isRecovering,
+                            WithRate = rate
+                        });
                     }
                 }
 
@@ -60,13 +65,12 @@ namespace ReliabilityModel.Model
                     continue;
                 }
 
-                foreach (SystemState nextState in transitionsForState.ToSystemStates)
+                foreach (SystemStateTransition nextState in transitionsForState.ToSystemStates)
                 {
-                    currentState.GetTransitionRate(nextState, out double rate);
-                    int toStateIdx = _allPossibleStates.IndexOf(nextState);
+                    int toStateIdx = _allPossibleStates.IndexOf(nextState.ToSystemState);
 
-                    adjacencyMatrix[fromStateIdx, toStateIdx] -= rate;
-                    adjacencyMatrix[toStateIdx, fromStateIdx] += rate;
+                    adjacencyMatrix[fromStateIdx, toStateIdx] -= nextState.WithRate;
+                    adjacencyMatrix[toStateIdx, fromStateIdx] += nextState.WithRate;
                 }
             }
 

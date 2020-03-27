@@ -32,9 +32,9 @@ namespace ReliabilityModel.Model.Formatters
                 stringBuilder.Append(" -> ");
 
                 const string delimiter = ", ";
-                foreach (SystemState toSystemState in transition.ToSystemStates)
+                foreach (SystemStateTransition toSystemState in transition.ToSystemStates)
                 {
-                    stringBuilder.Append(_representation(toSystemState));
+                    stringBuilder.Append(_representation(toSystemState.ToSystemState));
                     stringBuilder.Append(delimiter);
                 }
 

@@ -21,7 +21,7 @@ export function romanize(num) {
     return Array(+digits.join("") + 1).join("M") + roman;
 }
 
-export const DefaultSystemGarph = {
+export const DefaultSystemGraph = {
     edges: [
         {
             source: startNodeId,

@@ -6,6 +6,6 @@ namespace ReliabilityModel.Model.Responses
     {
         public SystemStateModel FromState { get; set; }
 
-        public IEnumerable<SystemStateModel> ToStates { get; set; }
+        public IEnumerable<SystemStateTransitionModel> ToStates { get; set; }
     }
 }

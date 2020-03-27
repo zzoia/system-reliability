@@ -69,9 +69,9 @@ export default function SystemStateTransition({ transition }) {
 
     const nextStates = transition.toStates.map((state, index) => (
         <ListItem key={index} button className={classes.nested}>
-            <ListItemIcon>{getIconComponent(state.status)}</ListItemIcon>
+            <ListItemIcon>{getIconComponent(state.toState.status)}</ListItemIcon>
             {
-                getChips(state.moduleStates)
+                getChips(state.toState.moduleStates)
             }
         </ListItem>
     ));

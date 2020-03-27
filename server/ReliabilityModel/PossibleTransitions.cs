@@ -7,11 +7,11 @@ namespace ReliabilityModel.Model
         public PossibleTransitions(SystemState systemState)
         {
             SystemState = systemState;
-            ToSystemStates = new List<SystemState>();
+            ToSystemStates = new List<SystemStateTransition>();
         }
 
         public SystemState SystemState { get; }
 
-        public IList<SystemState> ToSystemStates { get; }
+        public IList<SystemStateTransition> ToSystemStates { get; }
     }
 }

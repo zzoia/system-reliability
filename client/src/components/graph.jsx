@@ -8,7 +8,7 @@ import GraphConfig, {
     SKINNY_TYPE,
 } from '../utils/graph-config';
 
-import { DefaultSystemGarph as DefaultSystemGraph, startNodeId, endNodeId, romanize } from '../utils/graph-data';
+import { startNodeId, endNodeId, romanize } from '../utils/graph-data';
 class Graph extends React.Component {
     GraphView;
 
@@ -17,7 +17,7 @@ class Graph extends React.Component {
 
         this.state = {
             copiedNode: null,
-            graph: DefaultSystemGraph,
+            graph: props.value,
             selected: null
         };
 
