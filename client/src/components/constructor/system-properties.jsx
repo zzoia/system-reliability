@@ -17,7 +17,7 @@ export default function SystemProperties({ modules, onInvestigate }) {
 
     const classes = useStyles();
 
-    const mappedModules = modules.map(mod => ({ id: mod.id, failureRate: 0, recoveryRate: 0, left: 0 }));
+    const mappedModules = modules.map((mod, i) => ({ title: mod.title, id: mod.id, failureRate: i * 0.0001, recoveryRate: i * 0.01, left: 0 }));
 
     const setModule = (data) => {
         const toUpdate = mappedModules.find(currData => currData.id === data.id);
@@ -26,7 +26,7 @@ export default function SystemProperties({ modules, onInvestigate }) {
         toUpdate.left = data.left;
     }
 
-    const moduleEditors = modules.map((mod) => (
+    const moduleEditors = mappedModules.map((mod) => (
         <ModuleProperties
             key={mod.id}
             moduleData={mod}

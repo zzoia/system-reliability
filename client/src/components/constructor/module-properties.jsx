@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { NODE_KEY } from '../utils/graph-config';
+import { NODE_KEY } from '../../utils/graph-config';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -23,8 +23,8 @@ const useStyles = makeStyles(theme => ({
 export default function ModuleProperties({ moduleData, onChange }) {
   const classes = useStyles();
 
-  const [recoveryRate, setRecoveryRate] = useState(0);
-  const [failureRate, setFailureRate] = useState(0);
+  const [recoveryRate, setRecoveryRate] = useState(moduleData.recoveryRate);
+  const [failureRate, setFailureRate] = useState(moduleData.failureRate);
   const [left, setLeft] = useState(0);
 
   useEffect(() => {

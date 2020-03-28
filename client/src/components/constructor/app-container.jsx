@@ -8,13 +8,14 @@ import SystemProperties from './system-properties';
 import ModuleGraphRules from './module-graph-rules';
 import ValidatedJsonGraph from './validated-json-graph';
 
-import { DepthFirstSearchTreeValidator } from "../utils/depth-first-search-tree-validator";
-import { TreeBuilder } from "../utils/tree-builder";
-import { SequentialParallel } from "../utils/sequential-parallel";
-import { DefaultSystemGraph, startNodeId, endNodeId } from '../utils/graph-data';
-import { NODE_KEY } from '../utils/graph-config';
+import { DepthFirstSearchTreeValidator } from "../../utils/depth-first-search-tree-validator";
+import { TreeBuilder } from "../../utils/tree-builder";
+import { SequentialParallel } from "../../utils/sequential-parallel";
+import { DefaultSystemGraph, startNodeId, endNodeId } from '../../utils/graph-data';
+import { NODE_KEY } from '../../utils/graph-config';
 
 import Alert from '@material-ui/lab/Alert';
+import LocalStorageManager from '../../utils/local-storage-manager';
 
 const drawerWidth = 462;
 
@@ -63,6 +64,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function AppContainer() {
 
+    const localStorageManager = new LocalStorageManager();
     const classes = useStyles();
 
     const [json, setJson] = useState(null);
@@ -70,8 +72,7 @@ export default function AppContainer() {
     const [validationMessage, setValidationMessage] = useState(null);
     const [topLevelModule, setTopLevelModule] = useState(null);
 
-    const storageGraph = localStorage.getItem("graph");
-    const currentGraph = storageGraph ? JSON.parse(storageGraph) : DefaultSystemGraph;
+    const currentGraph = localStorageManager.getGraph() || DefaultSystemGraph;
 
     const [currentSystemGraph, setCurrentSystemGraph] = useState(currentGraph);
 
@@ -79,14 +80,15 @@ export default function AppContainer() {
 
         setModuleRates(topLevelModule.members, moduleRates);
 
+        const request = JSON.stringify(topLevelModule);
         const response = await fetch("http://localhost:53294/systemreliability/test", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(topLevelModule)
+            body: request
         });
 
-        const jsonObject = JSON.stringify(await response.json());
-        localStorage.setItem("adjacencyList", jsonObject);
+        localStorageManager.setSystemRequest(topLevelModule);
+        localStorageManager.setAdjacencyList(await response.json());
     };
 
     const showValidationResult = (graph) => {
@@ -99,7 +101,7 @@ export default function AppContainer() {
             setJson(startNode.getRepresentation());
             setValidationMessage(null);
 
-            localStorage.setItem("graph", JSON.stringify(currentSystemGraph));
+            localStorageManager.setGraph(currentSystemGraph);
 
             setTopLevelModule(startNode.toRequest(graph.nodes));
 

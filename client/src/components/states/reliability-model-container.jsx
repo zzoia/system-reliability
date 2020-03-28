@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import StateGraph from './state-graph';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import LocalStorageManager from '../../utils/local-storage-manager';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -81,12 +82,12 @@ const getGraph = (adjacencyList, includeTerminal) => {
 
 export default function ReliabilityModelContainer() {
 
-    let adjacencyList = localStorage.getItem("adjacencyList");
+    const localStorageManager = new LocalStorageManager();
+    let adjacencyList = localStorageManager.getAdjacencyList();
 
     const classes = useStyles();
     const [includeTerminal, setIncludeTerminal] = useState(false);
 
-    adjacencyList = JSON.parse(adjacencyList);
     const [graphData, setGraphData] = useState(getGraph(adjacencyList, includeTerminal));
 
     const handleGraphFilter = (event) => {

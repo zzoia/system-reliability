@@ -35,46 +35,66 @@ namespace ReliabilityModel.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("plot")]
-        public IActionResult GetPlot(double from, 
-            double to, 
-            double step, 
-            [FromBody] HybridSystemRequest hybridRequest)
+        [HttpPost("plots")]
+        public IActionResult GetPlot([FromBody] PlotRequest plotRequest)
         {
-            if (hybridRequest.Type != ModuleType.Multiple)
+            if (plotRequest.HybridSystemRequest.Type != ModuleType.Multiple)
             {
                 return BadRequest();
             }
 
-            SystemStateGraph system = ToSystemStateGraph(hybridRequest);
-            var plotData = system.GetProbability(from, to, step);
+            var result = new List<PlotResponse>();
+            foreach (double failureRate in plotRequest.FailureRates)
+            {
+                var systemRequest = HybridToSystemRequest(plotRequest.HybridSystemRequest, single =>
+                {
+                    if (single.ModuleName == plotRequest.ModuleName)
+                    {
+                        single.FailureRate = failureRate;
+                    }
+                    return single;
+                });
+                var system = (MultipleModuleSystem)systemRequest.ToSystem();
+                var graph = new SystemStateGraph(system, true);
+                var plotData = graph.GetProbability(plotRequest.FromTime, plotRequest.ToTime, plotRequest.Step);
 
-            return Ok(plotData);
+                result.Add(new PlotResponse
+                {
+                    FailureRate = failureRate,
+                    ModuleName = plotRequest.ModuleName,
+                    PlotData = plotData
+                });
+            }
+
+            return Ok(result);
         }
 
         private static SystemStateGraph ToSystemStateGraph(HybridSystemRequest systemRequest)
         {
-            var systemReques = HybridToSystemRequest(systemRequest);
+            var systemReques = HybridToSystemRequest(systemRequest, (_) => _);
             var system = (MultipleModuleSystem)systemReques.ToSystem();
-            return new SystemStateGraph(system);
+            return new SystemStateGraph(system, true);
         }
 
-        private static SystemRequest HybridToSystemRequest(HybridSystemRequest hybridRequest) => hybridRequest.Type switch
-        {
-            ModuleType.Multiple => new MultipleModuleSystemRequest
+        private static SystemRequest HybridToSystemRequest(
+            HybridSystemRequest hybridRequest,
+            Func<SingleModuleSystemRequest, SingleModuleSystemRequest> postConfigure)
+            => hybridRequest.Type switch
             {
-                Dependency = hybridRequest.Dependency.Value,
-                Members = hybridRequest.Members.Select(HybridToSystemRequest)
-            },
-            ModuleType.Single => new SingleModuleSystemRequest
-            {
-                FailureRate = hybridRequest.FailureRate,
-                Left = hybridRequest.Left == -1 ? (int?) null : hybridRequest.Left,
-                ModuleName = hybridRequest.ModuleName,
-                RecoveryRate = hybridRequest.RecoveryRate
-            },
-            _ => throw new ArgumentOutOfRangeException(),
-        };
+                ModuleType.Multiple => new MultipleModuleSystemRequest
+                {
+                    Dependency = hybridRequest.Dependency.Value,
+                    Members = hybridRequest.Members.Select(member => HybridToSystemRequest(member, postConfigure))
+                },
+                ModuleType.Single => postConfigure(new SingleModuleSystemRequest
+                {
+                    FailureRate = hybridRequest.FailureRate,
+                    Left = hybridRequest.Left == -1 ? (int?)null : hybridRequest.Left,
+                    ModuleName = hybridRequest.ModuleName,
+                    RecoveryRate = hybridRequest.RecoveryRate
+                }),
+                _ => throw new ArgumentOutOfRangeException(),
+            };
 
         private static SystemStateTransitionModel ToTransition(SystemStateTransition transition)
             => new SystemStateTransitionModel

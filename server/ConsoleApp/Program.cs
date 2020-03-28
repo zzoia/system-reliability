@@ -27,26 +27,6 @@ namespace ConsoleApp
             foreach (var sp in points)
                 Console.WriteLine("{0}\t{1}", sp.T, sp.X);
 
-            return;
-            var m1 = new SingleModuleSystem("I",  1);
-            var m2 = new SingleModuleSystem("II");
-            var m3 = new SingleModuleSystem("III");
-            var m4 = new SingleModuleSystem("IV");
-            var m5 = new SingleModuleSystem("V");
-            var m6 = new SingleModuleSystem("VI");
-
-            var system = new MultipleModuleSystem(
-                new List<ReliabilityModel.Model.System.System>
-                {
-                    new MultipleModuleSystem(new List<ReliabilityModel.Model.System.System> { m1, m2 }, ReliabilityDependency.And),
-                    new MultipleModuleSystem(new List<ReliabilityModel.Model.System.System> { m3, m4 }, ReliabilityDependency.And),
-                    new MultipleModuleSystem(new List<ReliabilityModel.Model.System.System> { m5, m6 }, ReliabilityDependency.And)
-                }, ReliabilityDependency.Or);
-
-            var systemStateGraph = new SystemStateGraph(system);
-            Console.WriteLine(new FullGraphFormatter(new AllStatesFilteringStrategy()).ToString(systemStateGraph));
-
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(system));
         }
 
         #region Work

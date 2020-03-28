@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using ReliabilityModel.Model;
@@ -10,7 +11,7 @@ namespace ReliabilityModel.Tests
     public class IntegrationTests
     {
         [Fact]
-        public void GetProbability_ThreeModulesNoRecovery_Calculates()
+        public void GetProbability_ThreeModulesTwoParallelNoRecovery_Calculates()
         {
             // Arrange
             var system = new MultipleModuleSystem(
@@ -25,6 +26,7 @@ namespace ReliabilityModel.Tests
                     },
                     new SingleModuleSystem("III", 0){FailureRate=0.0003}
                 }, ReliabilityDependency.And);
+
             const string expected = @"0 -> 1!, 2!, 4!
 1! -> 3!, 5!
 2! -> 3!, 6!
@@ -36,7 +38,7 @@ namespace ReliabilityModel.Tests
 ";
 
             // Act
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
             IReadOnlyList<WorkingProbability> actual = sut.GetProbability(0, 1000, 50);
 
             // Assert
@@ -73,7 +75,7 @@ namespace ReliabilityModel.Tests
 ";
 
             // Act
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
             var actual = new ShortGraphFormatter(new AllStatesFilteringStrategy()).ToString(sut);
 
             // Assert
@@ -106,7 +108,7 @@ namespace ReliabilityModel.Tests
 ";
 
             // Act
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
             var actual = new ShortGraphFormatter(new NonTerminalStatesFilteringStrategy()).ToString(sut);
 
             // Assert
@@ -135,11 +137,53 @@ namespace ReliabilityModel.Tests
 ";
 
             // Act
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
             var actual = new ShortGraphFormatter(new AllStatesFilteringStrategy()).ToString(sut);
 
             // Assert
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SystemStateGraphCtor_ThreeModulesTwoParallelNoRecovery_BuildsWeightMatrix()
+        {
+            // Arrange
+            var system = new MultipleModuleSystem(
+                new List<Model.System.System>
+                {
+                    new SingleModuleSystem("I", 0)
+                    {
+                        FailureRate = 0.0001
+                    },
+                    new MultipleModuleSystem(new List<Model.System.System>
+                    {
+                        new SingleModuleSystem("II", 0)
+                        {
+                            FailureRate = 0.0002
+                        },
+                        new SingleModuleSystem("III", 0)
+                        {
+                            FailureRate = 0.0003
+                        }
+                    }, ReliabilityDependency.Or)
+                }, ReliabilityDependency.And);
+            const string expectedMatrix = @"-0,0006 0 0 0 0 0 0 
+0,0003 -0,0003 0 0 0 0 0 
+0,0002 0 -0,0004 0 0 0 0 
+0 0,0002 0,0003 0 0 0 0 
+0,0001 0 0 0 0 0 0 
+0 0,0001 0 0 0 0 0 
+0 0 0,0001 0 0 0 0 
+";
+
+            var sut = new SystemStateGraph(system, false);
+
+            // Act
+            double[,] weightMatrix = sut.BuildWeightMatrix();
+            string weightMatrixString = MatrixToString(weightMatrix);
+
+            // Assert
+            Assert.Equal(expectedMatrix, weightMatrixString);
         }
 
         [Fact]
@@ -162,17 +206,13 @@ namespace ReliabilityModel.Tests
                         FailureRate = 0.0003
                     }
                 }, ReliabilityDependency.And);
-            const string expectedMatrix = @"0 -0,0003 -0,0002 0 -0,0001 0 0 0 
-0,0003 0 0 -0,0002 0 -0,0001 0 0 
-0,0002 0 0 -0,0003 0 0 -0,0001 0 
-0 0,0002 0,0003 0 0 0 0 -0,0001 
-0,0001 0 0 0 0 -0,0003 -0,0002 0 
-0 0,0001 0 0 0,0003 0 0 -0,0002 
-0 0 0,0001 0 0,0002 0 0 -0,0003 
-0 0 0 0,0001 0 0,0002 0,0003 0 
+            const string expectedMatrix = @"-0,0006 0 0 0 
+0,0003 0 0 0 
+0,0002 0 0 0 
+0,0001 0 0 0 
 ";
 
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, false);
 
             // Act
             double[,] weightMatrix = sut.BuildWeightMatrix();
@@ -205,16 +245,16 @@ namespace ReliabilityModel.Tests
                         RecoveryRate = 0.05
                     },
                 }, ReliabilityDependency.And);
-            const string expected = @"0 0,0497 0,0398 0 0,0299 0 0 0 
--0,0497 0 0 0,0398 0 0,0299 0 0 
--0,0398 0 0 0,0497 0 0 0,0299 0 
-0 -0,0398 -0,0497 0 0 0 0 0,0299 
--0,0299 0 0 0 0 0,0497 0,0398 0 
-0 -0,0299 0 0 -0,0497 0 0 0,0398 
-0 0 -0,0299 0 -0,0398 0 0 0,0497 
-0 0 0 -0,0299 0 -0,0398 -0,0497 0 
+            const string expected = @"-0,0006 0,05 0,04 0 0,03 0 0 0 
+0,0003 -0,0503 0 0,04 0 0,03 0 0 
+0,0002 0 -0,0404 0,05 0 0 0,03 0 
+0 0,0002 0,0003 -0,0901 0 0 0 0,03 
+0,0001 0 0 0 -0,0305 0,05 0,04 0 
+0 0,0001 0 0 0,0003 -0,0802 0 0,04 
+0 0 0,0001 0 0,0002 0 -0,0703 0,05 
+0 0 0 0,0001 0 0,0002 0,0003 -0,12 
 ";
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
 
             // Act
             double[,] actual = sut.BuildWeightMatrix();
@@ -246,7 +286,7 @@ namespace ReliabilityModel.Tests
 ";
 
             // Act
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
             var actual = new ShortGraphFormatter(new AllStatesFilteringStrategy()).ToString(sut);
 
             // Assert
@@ -339,7 +379,7 @@ namespace ReliabilityModel.Tests
 ";
 
             // Act
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
             var actual = new ShortGraphFormatter(new AllStatesFilteringStrategy()).ToString(sut);
 
             // Assert
@@ -405,7 +445,7 @@ namespace ReliabilityModel.Tests
 ";
 
             // Act
-            var sut = new SystemStateGraph(system);
+            var sut = new SystemStateGraph(system, true);
             var actual = new ShortGraphFormatter(new NonTerminalStatesFilteringStrategy()).ToString(sut);
 
             // Assert
@@ -419,7 +459,7 @@ namespace ReliabilityModel.Tests
             {
                 for (var col = 0; col < matrix.GetLength(1); col++)
                 {
-                    stringBuilder.Append(matrix[row, col]);
+                    stringBuilder.Append(Math.Round(matrix[row, col], 4, MidpointRounding.AwayFromZero));
                     stringBuilder.Append(" ");
                 }
 

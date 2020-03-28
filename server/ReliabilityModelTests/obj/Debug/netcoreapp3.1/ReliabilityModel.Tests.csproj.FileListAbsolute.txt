@@ -281,7 +281,6 @@ D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\bi
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\bin\Debug\netcoreapp3.1\ReliabilityModel.Model.dll
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\bin\Debug\netcoreapp3.1\Microsoft.Research.Oslo.dll
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\bin\Debug\netcoreapp3.1\ReliabilityModel.Model.pdb
-D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\bin\Debug\netcoreapp3.1\Microsoft.Research.Oslo.pdb
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\obj\Debug\netcoreapp3.1\ReliabilityModel.Tests.csprojAssemblyReference.cache
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\obj\Debug\netcoreapp3.1\ReliabilityModel.Tests.AssemblyInfoInputs.cache
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModelTests\obj\Debug\netcoreapp3.1\ReliabilityModel.Tests.AssemblyInfo.cs

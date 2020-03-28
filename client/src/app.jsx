@@ -1,12 +1,13 @@
 import React from 'react';
-import AppContainer from './components/app-container';
-import ReliabilityModelContainer from './components/reliability-model-container';
+import AppContainer from './components/constructor/app-container';
+import ReliabilityModelContainer from './components/states/reliability-model-container';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import Tabs from '@material-ui/core/Tabs';
 import LinkTab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
 import { makeStyles } from '@material-ui/core/styles';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import PlotsContainer from './components/plots/plots-container';
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -55,11 +56,13 @@ export default function App() {
             centered>
             <LinkTab label="Конструктор системи" href="/system-constructor" />
             <LinkTab label="Модель надійності" href="/reliability-model" />
+            <LinkTab label="Графіки" href="/plots" />
           </Tabs>
         </AppBar>
         <Route exact path="/" component={AppContainer} />
         <Route path="/system-constructor" component={AppContainer} />
         <Route path="/reliability-model" component={ReliabilityModelContainer} />
+        <Route path="/plots" component={PlotsContainer} />
       </Router>
     </ThemeProvider >
   );

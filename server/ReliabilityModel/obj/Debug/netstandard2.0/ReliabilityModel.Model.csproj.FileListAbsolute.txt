@@ -2,7 +2,6 @@ D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Deb
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.Model.dll
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Debug\netstandard2.0\ReliabilityModel.Model.pdb
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Debug\netstandard2.0\Microsoft.Research.Oslo.dll
-D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\bin\Debug\netstandard2.0\Microsoft.Research.Oslo.pdb
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.csprojAssemblyReference.cache
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.AssemblyInfoInputs.cache
 D:\Study\10 semester\Надійність\my-app\server\ReliabilityModel\obj\Debug\netstandard2.0\ReliabilityModel.Model.AssemblyInfo.cs

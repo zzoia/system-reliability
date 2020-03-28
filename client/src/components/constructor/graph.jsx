@@ -6,9 +6,9 @@ import GraphConfig, {
     EMPTY_EDGE_TYPE,
     NODE_KEY,
     SKINNY_TYPE,
-} from '../utils/graph-config';
+} from '../../utils/graph-config';
 
-import { startNodeId, endNodeId, romanize } from '../utils/graph-data';
+import { startNodeId, endNodeId, romanize } from '../../utils/graph-data';
 class Graph extends React.Component {
     GraphView;
 
