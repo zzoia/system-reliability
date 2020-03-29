@@ -1,9 +1,21 @@
 import React from 'react';
+import Card from '@material-ui/core/Card';
+import { makeStyles } from '@material-ui/core/styles';
+import CardContent from '@material-ui/core/CardContent';
+
 import Plotly from "plotly.js-basic-dist";
 import createPlotlyComponent from "react-plotly.js/factory";
 const Plot = createPlotlyComponent(Plotly);
 
+const useStyles = makeStyles(theme => ({
+    container: {
+        margin: theme.spacing(2)
+    }
+}));
+
 export default function WorkingProbabilityPlot({ plotData }) {
+
+    const classes = useStyles();
 
     const data = plotData.map(plot => (
         {
@@ -17,11 +29,15 @@ export default function WorkingProbabilityPlot({ plotData }) {
     ))
 
     return (
-        <div>
-            <Plot
-                data={data}
-                layout={{ title: plotData[0] && `Модуль '${plotData[0].moduleName}'` }}
-            />
+        <div className={classes.container}>
+            <Card>
+                <CardContent>
+                    <Plot
+                        data={data}
+                        layout={{ title: plotData[0] && `Модуль '${plotData[0].moduleName}'` }}
+                    />
+                </CardContent>
+            </Card>
         </div>
     );
 

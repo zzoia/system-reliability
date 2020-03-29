@@ -10,9 +10,21 @@ namespace ReliabilityModel.Tests
 {
     public class IntegrationTests
     {
-        [Fact]
-        public void GetProbability_ThreeModulesTwoParallelNoRecovery_Calculates()
+        [Theory]
+        [InlineData(new object [] { true, "1 0,887 0,787 0,698 0,619 0,549 " })]
+        [InlineData(new object[] { false, "1 0,887 0,787 0,698 0,619 0,549 " })]
+        public void GetProbability_ThreeModulesTwoParallelNoRecovery_Calculates(bool isTerminal, string expected)
         {
+            string PlotDataToString(IReadOnlyList<WorkingProbability> data)
+            {
+                var sb = new StringBuilder();
+                foreach (WorkingProbability probability in data)
+                {
+                    sb.Append(Math.Round(probability.AggregatedProbability, 3) + " ");
+                }
+                return sb.ToString();
+            }
+
             // Arrange
             var system = new MultipleModuleSystem(
                 new List<Model.System.System>
@@ -27,22 +39,14 @@ namespace ReliabilityModel.Tests
                     new SingleModuleSystem("III", 0){FailureRate=0.0003}
                 }, ReliabilityDependency.And);
 
-            const string expected = @"0 -> 1!, 2!, 4!
-1! -> 3!, 5!
-2! -> 3!, 6!
-3! -> 7!
-4! -> 5!, 6!
-5! -> 7!
-6! -> 7!
-7! -> 
-";
 
             // Act
-            var sut = new SystemStateGraph(system, true);
-            IReadOnlyList<WorkingProbability> actual = sut.GetProbability(0, 1000, 50);
+            var sut = new SystemStateGraph(system, isTerminal);
+            IReadOnlyList<WorkingProbability> actual = sut.GetProbability(0, 1000, 200);
+            var stringified = PlotDataToString(actual);
 
             // Assert
-            //Assert.Equal(expected, actual);
+            Assert.Equal(expected, stringified);
         }
 
         [Fact]
@@ -144,8 +148,25 @@ namespace ReliabilityModel.Tests
             Assert.Equal(expected, actual);
         }
 
-        [Fact]
-        public void SystemStateGraphCtor_ThreeModulesTwoParallelNoRecovery_BuildsWeightMatrix()
+        [Theory]
+        [InlineData(new object[] { true, @"-0,0006 0 0 0 0 0 0 0 
+0,0003 -0,0003 0 0 0 0 0 0 
+0,0002 0 -0,0004 0 0 0 0 0 
+0 0,0002 0,0003 -0,0001 0 0 0 0 
+0,0001 0 0 0 -0,0005 0 0 0 
+0 0,0001 0 0 0,0003 -0,0002 0 0 
+0 0 0,0001 0 0,0002 0 -0,0003 0 
+0 0 0 0,0001 0 0,0002 0,0003 0 
+"})]
+        [InlineData(new object[] { false, @"-0,0006 0 0 0 0 0 0 
+0,0003 -0,0003 0 0 0 0 0 
+0,0002 0 -0,0004 0 0 0 0 
+0 0,0002 0,0003 0 0 0 0 
+0,0001 0 0 0 0 0 0 
+0 0,0001 0 0 0 0 0 
+0 0 0,0001 0 0 0 0 
+" })]
+        public void SystemStateGraphCtor_ThreeModulesTwoParallelNoRecovery_BuildsWeightMatrix(bool includeTerminal, string expectedMatrix)
         {
             // Arrange
             var system = new MultipleModuleSystem(
@@ -167,16 +188,7 @@ namespace ReliabilityModel.Tests
                         }
                     }, ReliabilityDependency.Or)
                 }, ReliabilityDependency.And);
-            const string expectedMatrix = @"-0,0006 0 0 0 0 0 0 
-0,0003 -0,0003 0 0 0 0 0 
-0,0002 0 -0,0004 0 0 0 0 
-0 0,0002 0,0003 0 0 0 0 
-0,0001 0 0 0 0 0 0 
-0 0,0001 0 0 0 0 0 
-0 0 0,0001 0 0 0 0 
-";
-
-            var sut = new SystemStateGraph(system, false);
+            var sut = new SystemStateGraph(system, includeTerminal);
 
             // Act
             double[,] weightMatrix = sut.BuildWeightMatrix();

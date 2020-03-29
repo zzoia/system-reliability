@@ -8,6 +8,7 @@ import AppBar from '@material-ui/core/AppBar';
 import { makeStyles } from '@material-ui/core/styles';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import PlotsContainer from './components/plots/plots-container';
+import EquationSystemContainer from './components/equation-system/equation-system-container';
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -36,11 +37,33 @@ const theme = createMuiTheme({
   },
 });
 
+const getUrlIndex = () => {
+  switch (window.location.pathname) {
+    case paths.systemConstructor:
+      return 0;
+    case paths.reliabilityModel:
+      return 1;
+    case paths.equationSystem:
+      return 2;
+    case paths.plots:
+      return 3;
+    default:
+      return 0;
+  }
+}
+
+const paths = {
+  systemConstructor: "/system-constructor",
+  reliabilityModel: "/reliability-model",
+  plots: "/plots",
+  equationSystem: "/equation-system"
+}
+
 export default function App() {
 
   const classes = useStyles();
 
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(getUrlIndex());
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -54,15 +77,17 @@ export default function App() {
             value={value}
             onChange={handleChange}
             centered>
-            <LinkTab label="Конструктор системи" href="/system-constructor" />
-            <LinkTab label="Модель надійності" href="/reliability-model" />
-            <LinkTab label="Графіки" href="/plots" />
+            <LinkTab label="Конструктор системи" href={paths.systemConstructor} />
+            <LinkTab label="Модель надійності" href={paths.reliabilityModel} />
+            <LinkTab label="Система рівнянь" href={paths.equationSystem} />
+            <LinkTab label="Графіки" href={paths.plots} />
           </Tabs>
         </AppBar>
         <Route exact path="/" component={AppContainer} />
-        <Route path="/system-constructor" component={AppContainer} />
-        <Route path="/reliability-model" component={ReliabilityModelContainer} />
-        <Route path="/plots" component={PlotsContainer} />
+        <Route path={paths.systemConstructor} component={AppContainer} />
+        <Route path={paths.reliabilityModel} component={ReliabilityModelContainer} />
+        <Route path={paths.equationSystem} component={EquationSystemContainer} />
+        <Route path={paths.plots} component={PlotsContainer} />
       </Router>
     </ThemeProvider >
   );

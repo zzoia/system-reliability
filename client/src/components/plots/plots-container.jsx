@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import WorkingProbabilityPlot from './working-probability-plot';
 import LocalStorageManager from '../../utils/local-storage-manager';
+import PlotsLayout from './plots-layout';
 
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -14,18 +14,22 @@ import TextField from '@material-ui/core/TextField';
 const useStyles = makeStyles(theme => ({
     container: {
         display: "flex",
+        background: "#f9f9f9",
         height: "inherit",
         alignItems: "stretch",
-        marginTop: "48px",
-        flexDirection: "column"
+        marginTop: "48px"
     },
     formControl: {
-        margin: theme.spacing(1),
-        minWidth: 120,
+        margin: theme.spacing(1)
     },
     settings: {
+        padding: theme.spacing(2),
         display: "flex",
-        alignItems: "center"
+        alignItems: "center",
+        alignItems: "stretch",
+        flexDirection: "column",
+        background: "#fff",
+        flexShrink: 0
     }
 }));
 
@@ -59,7 +63,8 @@ export default function PlotsContainer() {
             body: request
         });
 
-        setPlots(await response.json());
+        const currentPlots = plots.filter(plot => plot[0].moduleName !== moduleName);
+        setPlots([await response.json(), ...currentPlots]);
     };
 
     const nodes = localStorageManager.getGraph().nodes.filter(node => node.id !== endNodeId && node.id !== startNodeId);
@@ -131,7 +136,7 @@ export default function PlotsContainer() {
                     Побудувати графік
                 </Button>
             </div>
-            {plots.length && <WorkingProbabilityPlot plotData={plots} />}
+            <PlotsLayout plots={plots} />
         </div>
     )
 }

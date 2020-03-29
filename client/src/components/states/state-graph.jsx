@@ -20,8 +20,8 @@ const config = {
     "width": 1270,
     "d3": {
         "alphaTarget": 0.05,
-        "gravity": -400,
-        "linkLength": 150,
+        "gravity": -500,
+        "linkLength": 250,
         "linkStrength": 1,
         "disableLinkForce": false
     },
@@ -39,7 +39,7 @@ const config = {
         "mouseCursor": "pointer",
         "opacity": 1,
         "renderLabel": true,
-        "size": 450,
+        "size": 250,
         "strokeColor": "#16b580",
         "strokeWidth": 4,
         "svg": "",

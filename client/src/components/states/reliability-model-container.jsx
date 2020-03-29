@@ -21,21 +21,15 @@ const useStyles = makeStyles(theme => ({
 const modulesToLabel = (modules) => {
     let result = ""
     modules.forEach(moduleState => {
-        result += moduleState.name;
+        result += moduleState.isWorking ? "1" : "0";
         if (moduleState.left !== null) {
             result += `(${moduleState.left})`;
         }
-
-        if (!moduleState.isWorking) {
-            result += "(-)";
-        }
-
-        result += " ";
     });
-    return result.substring(0, result.length - 1);
-}
+    return result;
+};
 
-const statesToColor = (status) => {
+export const statusToColor = (status) => {
     switch (status) {
         case "working":
             return "#16b580";
@@ -46,7 +40,7 @@ const statesToColor = (status) => {
         default:
             break;
     }
-}
+};
 
 const getGraph = (adjacencyList, includeTerminal) => {
     const graphLinks = [];
@@ -67,8 +61,8 @@ const getGraph = (adjacencyList, includeTerminal) => {
         }
         return {
             id,
-            strokeColor: statesToColor(node.fromState.status),
-            highlightColor: statesToColor(node.fromState.status)
+            strokeColor: statusToColor(node.fromState.status),
+            highlightColor: statusToColor(node.fromState.status)
         };
     });
 
@@ -78,7 +72,7 @@ const getGraph = (adjacencyList, includeTerminal) => {
         nodes: graphNodes,
         links: graphLinks
     };
-}
+};
 
 export default function ReliabilityModelContainer() {
 
@@ -105,7 +99,6 @@ export default function ReliabilityModelContainer() {
                         <Checkbox
                             checked={includeTerminal}
                             onChange={handleGraphFilter}
-                            name="checkedB"
                             color="primary"
                         />
                     }
