@@ -52,7 +52,7 @@ namespace ReliabilityModel.Api.Controllers
                 {
                     if (single.ModuleName == plotRequest.ModuleName)
                     {
-                        single.FailureRate = failureRate;
+                        single.FailureRate = Math.Round(failureRate, 7, MidpointRounding.AwayFromZero);
                     }
                     return single;
                 });
@@ -62,11 +62,23 @@ namespace ReliabilityModel.Api.Controllers
 
                 result.Add(new PlotResponse
                 {
-                    FailureRate = failureRate,
+                    FailureRate = Math.Round(failureRate, 7, MidpointRounding.AwayFromZero),
                     ModuleName = plotRequest.ModuleName,
                     PlotData = plotData
                 });
             }
+
+            var originalRequest = HybridToSystemRequest(plotRequest.HybridSystemRequest, _ => _);
+            var originalSystem = (MultipleModuleSystem)originalRequest.ToSystem();
+            var originalGraph = new SystemStateGraph(originalSystem, false);
+            var originalPlotData = originalGraph.GetProbability(plotRequest.FromTime, plotRequest.ToTime, plotRequest.Step);
+
+            result.Add(new PlotResponse
+            {
+                FailureRate = -1,
+                ModuleName = plotRequest.ModuleName,
+                PlotData = originalPlotData
+            });
 
             return Ok(result);
         }

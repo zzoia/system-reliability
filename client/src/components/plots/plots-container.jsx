@@ -7,8 +7,10 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
+import Divider from '@material-ui/core/Divider';
 import Select from '@material-ui/core/Select';
 import { startNodeId, endNodeId } from '../../utils/graph-data';
+import { round } from '../equation-system/equation-right-side';
 import TextField from '@material-ui/core/TextField';
 
 const useStyles = makeStyles(theme => ({
@@ -39,18 +41,28 @@ export default function PlotsContainer() {
 
     const [plots, setPlots] = useState([]);
     const [moduleName, setModuleName] = useState("");
+
     const [startTime, setStartTime] = useState(0);
     const [endTime, setEndTime] = useState(1000);
     const [step, setStep] = useState(50);
+
+    const [startLambda, setStartLambda] = useState(0.0001);
+    const [endLambda, setEndLambda] = useState(0.0003);
+    const [stepLambda, setStepLambda] = useState(0.0001);
 
     const localStorageManager = new LocalStorageManager();
     const systemRequest = localStorageManager.getSystemRequest();
 
     const loadPlotData = async () => {
+        const number = (endLambda - startLambda) / stepLambda + 1;
+        const lambdas = [];
+        for (let i = 0; i < number; i++) {
+            lambdas.push(startLambda + i * stepLambda);
+        }
 
         const request = JSON.stringify({
             moduleName,
-            failureRates: [0.0001, 0.0002, 0.0003],
+            failureRates: lambdas,
             fromTime: +startTime,
             toTime: +endTime,
             step: +step,
@@ -90,6 +102,7 @@ export default function PlotsContainer() {
                         {modules}
                     </Select>
                 </FormControl>
+                <Divider />
                 <TextField
                     required
                     label="Початок"
@@ -126,6 +139,46 @@ export default function PlotsContainer() {
                         inputProps: {
                             step: 10,
                             min: 10
+                        }
+                    }}
+                    type="number" />
+                <Divider />
+                <TextField
+                    required
+                    label="Початок, λ"
+                    value={startLambda}
+                    className={classes.formControl}
+                    onChange={updateField(setStartLambda)}
+                    InputProps={{
+                        inputProps: {
+                            step: 0.0001,
+                            min: 0.0001
+                        }
+                    }}
+                    type="number" />
+                <TextField
+                    required
+                    label="Кінець, λ"
+                    value={endLambda}
+                    className={classes.formControl}
+                    onChange={updateField(setEndLambda)}
+                    InputProps={{
+                        inputProps: {
+                            step: 0.0001,
+                            min: 0.0002
+                        }
+                    }}
+                    type="number" />
+                <TextField
+                    required
+                    label="Крок, λ"
+                    className={classes.formControl}
+                    value={stepLambda}
+                    onChange={updateField(setStepLambda)}
+                    InputProps={{
+                        inputProps: {
+                            step: 0.0001,
+                            min: 0.0001
                         }
                     }}
                     type="number" />
