@@ -7,7 +7,6 @@ const useStyles = makeStyles(theme => ({
         height: "30px"
     },
     coeff: {
-        flex: "1 1 0px",
         padding: "4px",
         minWidth: "70px"
     }
@@ -21,11 +20,14 @@ export default function EquationRightSide({ coeffs }) {
 
     const classes = useStyles();
 
-    const data = coeffs.map((coeff, index) => (
-        <div className={classes.coeff} key={index} style={{ color: coeff ? "#000" : "#d3d3d3" }}>
-            {round(coeff, 7)}
-        </div>
-    ));
+    const data = coeffs
+        .map((coeff, index) => ({ coeff, index }))
+        .filter(({ coeff, _ }) => (round(coeff, 7) !== 0))
+        .map(({ coeff, index }, i, arr) => (
+            <div className={classes.coeff} key={index}>
+                {`${((i === 0 || coeff < 0) ? "" : "+ ")}${round(coeff, 7)} * P${index + 1}(t)`}
+            </div>
+        ));
 
     return (
         <div className={classes.row}>

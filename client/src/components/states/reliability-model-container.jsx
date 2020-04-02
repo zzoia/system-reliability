@@ -43,6 +43,7 @@ export const statusToColor = (status) => {
 };
 
 const getGraph = (adjacencyList, includeTerminal) => {
+
     const graphLinks = [];
     let graphNodes = adjacencyList.map(node => {
         const id = modulesToLabel(node.fromState.moduleStates);
@@ -67,6 +68,10 @@ const getGraph = (adjacencyList, includeTerminal) => {
     });
 
     graphNodes = graphNodes.filter(node => graphLinks.some(link => link.source === node.id || link.target === node.id));
+
+    if (graphNodes.length > 64) {
+        return null;
+    }
 
     return {
         nodes: graphNodes,

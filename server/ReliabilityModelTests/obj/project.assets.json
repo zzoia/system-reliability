@@ -6517,11 +6517,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Study\\10 semester\\Надійність\\my-app\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
+      "projectUniqueName": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
       "projectName": "ReliabilityModel.Tests",
-      "projectPath": "D:\\Study\\10 semester\\Надійність\\my-app\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
+      "projectPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
       "packagesPath": "C:\\Users\\Zoja\\.nuget\\packages\\",
-      "outputPath": "D:\\Study\\10 semester\\Надійність\\my-app\\server\\ReliabilityModelTests\\obj\\",
+      "outputPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -6540,8 +6540,8 @@
       "frameworks": {
         "netcoreapp3.1": {
           "projectReferences": {
-            "D:\\Study\\10 semester\\Надійність\\my-app\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj": {
-              "projectPath": "D:\\Study\\10 semester\\Надійність\\my-app\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj"
+            "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj": {
+              "projectPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj"
             }
           }
         }

@@ -60,7 +60,7 @@ export default function SystemStateTransition({ transition }) {
                 variant={mod.isWorking ? "outlined" : "default"}
                 size="small"
                 icon={mod.isWorking ? <AddIcon /> : <RemoveIcon />}
-                label={mod.name}
+                label={(mod.name) + (mod.left == null ? "" :` (${mod.left})`)}
                 clickable
                 className={classes.chip}
             />

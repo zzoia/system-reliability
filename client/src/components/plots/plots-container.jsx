@@ -47,8 +47,8 @@ export default function PlotsContainer() {
     const [step, setStep] = useState(50);
 
     const [startLambda, setStartLambda] = useState(0.0001);
-    const [endLambda, setEndLambda] = useState(0.0003);
-    const [stepLambda, setStepLambda] = useState(0.0001);
+    const [endLambda, setEndLambda] = useState(0.0007);
+    const [stepLambda, setStepLambda] = useState(0.0002);
 
     const localStorageManager = new LocalStorageManager();
     const systemRequest = localStorageManager.getSystemRequest();

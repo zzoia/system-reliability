@@ -18,21 +18,6 @@ const useStyles = makeStyles(theme => ({
     system: {
         display: "flex"
     },
-    topState: {
-        padding: "4px",
-        width: "70px"
-    },
-    topRow: {
-        marginLeft: "110px",
-        marginBottom: theme.spacing(2),
-        flexShrink: 0,
-        maxWidth: "1000px",
-        overflow: "auto"
-    },
-    topRowContent: {
-        padding: "10px 10px 0 10px",
-        marginBottom: "-14px"
-    },
     leftSide: {
         display: "flex",
         flexDirection: "column"
@@ -82,20 +67,6 @@ export default function EquationSystemContainer() {
 
     return (
         <div className={classes.container}>
-            <Card className={classes.topRow}>
-                <CardContent classes={{ root: classes.topRowContent }}>
-                    <div className={classes.system}>
-                        {
-                            states.map((state, index) => (
-                                <div
-                                    key={index}
-                                    className={classes.topState}
-                                    style={{ color: statusToColor(state.status) }}>P{index + 1}(t)</div>
-                            ))
-                        }
-                    </div>
-                </CardContent>
-            </Card>
             <div className={classes.system}>
                     <Card>
                         <CardContent>

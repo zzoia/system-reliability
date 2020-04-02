@@ -1,5 +1,7 @@
 import React from 'react';
 import { Graph } from "react-d3-graph";
+import Alert from '@material-ui/lab/Alert';
+import { makeStyles } from '@material-ui/core';
 
 const config = {
     "automaticRearrangeAfterDropNode": false,
@@ -65,12 +67,26 @@ const config = {
     }
 };
 
+const useStyles = makeStyles(theme => ({
+    container: {
+        flexGrow: 1,
+        background: "#f9f9f9"
+    }
+}));
+
 export default function StateGraph({ stateGraph }) {
 
+    const classes = useStyles();
+
     return (
-        <Graph
-            id="graph-id"
-            data={stateGraph}
-            config={config}/>
-    );
+        <div className={classes.container}>
+            {
+                stateGraph
+                    ? (<Graph
+                        id="graph-id"
+                        data={stateGraph}
+                        config={config} />)
+                    : (<Alert severity="error">Граф завеликий!</Alert>)
+            }
+        </div>);
 }
