@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import LocalStorageManager from '../../utils/local-storage-manager';
 import PlotsLayout from './plots-layout';
 
 import InputLabel from '@material-ui/core/InputLabel';
@@ -10,8 +9,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Divider from '@material-ui/core/Divider';
 import Select from '@material-ui/core/Select';
 import { startNodeId, endNodeId } from '../../utils/graph-data';
-import { round } from '../equation-system/equation-right-side';
 import TextField from '@material-ui/core/TextField';
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -35,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function PlotsContainer() {
+function PlotsContainer(props) {
 
     const classes = useStyles();
 
@@ -43,15 +42,12 @@ export default function PlotsContainer() {
     const [moduleName, setModuleName] = useState("");
 
     const [startTime, setStartTime] = useState(0);
-    const [endTime, setEndTime] = useState(1000);
-    const [step, setStep] = useState(50);
+    const [endTime, setEndTime] = useState(5000);
+    const [step, setStep] = useState(250); 
 
     const [startLambda, setStartLambda] = useState(0.0001);
     const [endLambda, setEndLambda] = useState(0.0007);
     const [stepLambda, setStepLambda] = useState(0.0002);
-
-    const localStorageManager = new LocalStorageManager();
-    const systemRequest = localStorageManager.getSystemRequest();
 
     const loadPlotData = async () => {
         const number = (endLambda - startLambda) / stepLambda + 1;
@@ -66,7 +62,7 @@ export default function PlotsContainer() {
             fromTime: +startTime,
             toTime: +endTime,
             step: +step,
-            hybridSystemRequest: systemRequest
+            hybridSystemRequest: props.systemRequest
         });
 
         const response = await fetch("http://localhost:53294/systemreliability/plots", {
@@ -79,7 +75,7 @@ export default function PlotsContainer() {
         setPlots([await response.json(), ...currentPlots]);
     };
 
-    const nodes = localStorageManager.getGraph().nodes.filter(node => node.id !== endNodeId && node.id !== startNodeId);
+    const nodes = props.currentGraph.nodes.filter(node => node.id !== endNodeId && node.id !== startNodeId);
     const modules = nodes.map(m => (<MenuItem key={m.title} value={m.title}>{m.title}</MenuItem>))
 
     const handleClick = () => {
@@ -192,4 +188,13 @@ export default function PlotsContainer() {
             <PlotsLayout plots={plots} />
         </div>
     )
-}
+};
+
+const mapStateToProps = function (state) {
+    return {
+        systemRequest: state.investigationRequest,
+        currentGraph: state.systemSchemeGraph.systemScheme
+    }
+};
+
+export default connect(mapStateToProps)(PlotsContainer);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
+import { round } from '../../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     row: {
@@ -12,20 +13,16 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const round = (number, decimals) => {
-    return Math.round((number + Number.EPSILON) * Math.pow(10, decimals)) / Math.pow(10, decimals);
-}
-
 export default function EquationRightSide({ coeffs }) {
 
     const classes = useStyles();
 
     const data = coeffs
-        .map((coeff, index) => ({ coeff, index }))
-        .filter(({ coeff, _ }) => (round(coeff, 7) !== 0))
-        .map(({ coeff, index }, i, arr) => (
+        .map((coeff, index) => ({ coeff: round(coeff), index }))
+        .filter(({ coeff, _ }) => (coeff !== 0))
+        .map(({ coeff, index }, i) => (
             <div className={classes.coeff} key={index}>
-                {`${((i === 0 || coeff < 0) ? "" : "+ ")}${round(coeff, 7)} * P${index + 1}(t)`}
+                {`${((i === 0 || coeff < 0) ? "" : "+ ")}${coeff} * P${index + 1}(t)`}
             </div>
         ));
 

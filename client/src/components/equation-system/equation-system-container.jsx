@@ -4,6 +4,7 @@ import { CardContent, Card } from '@material-ui/core';
 import LocalStorageManager from '../../utils/local-storage-manager';
 import { statusToColor } from '../states/reliability-model-container'
 import EquationRightSide from './equation-right-side';
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -33,27 +34,24 @@ const useStyles = makeStyles(theme => ({
     },
     coefficients: {
         marginLeft: theme.spacing(2),
-        overflow: "scroll",
+        overflow: "auto",
         maxWidth: "1000px"
     }
 }));
 
-export default function EquationSystemContainer() {
+function EquationSystemContainer(props) {
 
     const classes = useStyles();
 
     const [states, setStates] = useState([]);
     const [coeffs, setCoeffs] = useState([]);
 
-    const localStorageManager = new LocalStorageManager();
-    const systemRequest = localStorageManager.getSystemRequest();
-
-    const getEquation = async (systemRequest) => {
+    const getEquation = async () => {
 
         const response = await fetch("http://localhost:53294/systemreliability/equation-system", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(systemRequest)
+            body: JSON.stringify(props.systemRequest)
         });
 
         const data = await response.json();
@@ -62,26 +60,26 @@ export default function EquationSystemContainer() {
     };
 
     useEffect(() => {
-        getEquation(systemRequest);
-    }, []);
+        getEquation();
+    }, [props.systemRequest]);
 
     return (
         <div className={classes.container}>
             <div className={classes.system}>
-                    <Card>
-                        <CardContent>
-                            <div className={classes.leftSide}>
-                                {
-                                    states.map((state, index) => (
-                                        <div
-                                            key={index}
-                                            className={classes.leftSideState}
-                                            style={{ color: statusToColor(state.status) }}>P{index + 1}(t)/dt</div>
-                                    ))
-                                }
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent>
+                        <div className={classes.leftSide}>
+                            {
+                                states.map((state, index) => (
+                                    <div
+                                        key={index}
+                                        className={classes.leftSideState}
+                                        style={{ color: statusToColor(state.status) }}>P{index + 1}(t)/dt</div>
+                                ))
+                            }
+                        </div>
+                    </CardContent>
+                </Card>
                 <Card className={classes.coefficients}>
                     <CardContent>
                         {coeffs.map((equationCoeffs, index) => (<EquationRightSide coeffs={equationCoeffs} key={index} />))}
@@ -90,4 +88,12 @@ export default function EquationSystemContainer() {
             </div>
         </div>
     );
-}
+};
+
+const mapStateToProps = function (state) {
+    return {
+        systemRequest: state.investigationRequest
+    }
+};
+
+export default connect(mapStateToProps)(EquationSystemContainer);

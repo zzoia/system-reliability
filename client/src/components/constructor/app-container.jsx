@@ -11,11 +11,15 @@ import ValidatedJsonGraph from './validated-json-graph';
 import { DepthFirstSearchTreeValidator } from "../../utils/depth-first-search-tree-validator";
 import { TreeBuilder } from "../../utils/tree-builder";
 import { SequentialParallel } from "../../utils/sequential-parallel";
-import { DefaultSystemGraph, startNodeId, endNodeId } from '../../utils/graph-data';
+import { startNodeId, endNodeId } from '../../utils/graph-data';
 import { NODE_KEY } from '../../utils/graph-config';
 
 import Alert from '@material-ui/lab/Alert';
+import { connect } from 'react-redux';
 import LocalStorageManager from '../../utils/local-storage-manager';
+import { setSystemScheme } from '../../redux/system-scheme-graph-slice';
+import { setAdjacencyList } from '../../redux/system-state-adjacency-list-slice';
+import { setInvestigationRequest } from '../../redux/investigation-request-slice';
 
 const drawerWidth = 462;
 
@@ -62,9 +66,8 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function AppContainer() {
+function AppContainer(props) {
 
-    const localStorageManager = new LocalStorageManager();
     const classes = useStyles();
 
     const [json, setJson] = useState(null);
@@ -72,9 +75,7 @@ export default function AppContainer() {
     const [validationMessage, setValidationMessage] = useState(null);
     const [topLevelModule, setTopLevelModule] = useState(null);
 
-    const currentGraph = localStorageManager.getGraph() || DefaultSystemGraph;
-
-    const [currentSystemGraph, setCurrentSystemGraph] = useState(currentGraph);
+    const [currentSystemGraph, setCurrentSystemGraph] = useState(props.currentGraph);
 
     const investigate = async (moduleRates) => {
 
@@ -87,11 +88,11 @@ export default function AppContainer() {
             body: request
         });
 
-        localStorageManager.setSystemRequest(topLevelModule);
-        localStorageManager.setAdjacencyList(await response.json());
+        props.setInvestigationRequest(topLevelModule);
+        props.setAdjacencyList(await response.json());
     };
 
-    const showValidationResult = (graph) => {
+    const onSystemSchemeChanged = (graph) => {
         try {
             const treeNodes = validateModuleGraph(graph);
 
@@ -101,7 +102,7 @@ export default function AppContainer() {
             setJson(startNode.getRepresentation());
             setValidationMessage(null);
 
-            localStorageManager.setGraph(currentSystemGraph);
+            props.setSystemScheme(graph);
 
             setTopLevelModule(startNode.toRequest(graph.nodes));
 
@@ -110,7 +111,9 @@ export default function AppContainer() {
             setJson(null);
         }
 
-        setSystemModules(graph.nodes.filter(node => node.id !== endNodeId && node.id !== startNodeId));
+        setSystemModules(graph.nodes
+            .filter(node => node.id !== endNodeId && node.id !== startNodeId)
+            .map((node, index) => ({ title: node.title, id: node.id, failureRate: (index + 1) * 0.0001, recoveryRate: (index + 1) * 0.01, left: 0 })));
     }
 
     const validateModuleGraph = (graph) => {
@@ -180,7 +183,7 @@ export default function AppContainer() {
             <main className={clsx(classes.content)}>
                 <div className={classes.drawerHeader} />
                 <Graph
-                    onChange={showValidationResult}
+                    onChange={onSystemSchemeChanged}
                     value={currentSystemGraph} />
             </main>
             <Drawer
@@ -200,4 +203,20 @@ export default function AppContainer() {
             </Drawer>
         </div >
     );
+};
+
+const mapStateToProps = function (state) {
+    return {
+        currentGraph: state.systemSchemeGraph.systemScheme
+    }
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        setSystemScheme: (graph) => dispatch(setSystemScheme({ graph })),
+        setAdjacencyList: (list) => dispatch(setAdjacencyList({ adjacencyList: list })),
+        setInvestigationRequest: (investigationRequest) => dispatch(setInvestigationRequest({ investigationRequest }))
+    }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(AppContainer);

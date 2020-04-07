@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import StateGraph from './state-graph';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import LocalStorageManager from '../../utils/local-storage-manager';
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -79,21 +79,18 @@ const getGraph = (adjacencyList, includeTerminal) => {
     };
 };
 
-export default function ReliabilityModelContainer() {
-
-    const localStorageManager = new LocalStorageManager();
-    let adjacencyList = localStorageManager.getAdjacencyList();
+function ReliabilityModelContainer(props) {
 
     const classes = useStyles();
     const [includeTerminal, setIncludeTerminal] = useState(false);
 
-    const [graphData, setGraphData] = useState(getGraph(adjacencyList, includeTerminal));
+    const [graphData, setGraphData] = useState(getGraph(props.adjacencyList, includeTerminal));
 
     const handleGraphFilter = (event) => {
         const include = event.target.checked;
         setIncludeTerminal(include);
 
-        setGraphData(getGraph(adjacencyList, include))
+        setGraphData(getGraph(props.adjacencyList, include))
     }
 
     return (
@@ -111,7 +108,15 @@ export default function ReliabilityModelContainer() {
                 />
             </div>
             <StateGraph stateGraph={graphData} />
-            <AdjacencyList adjacencyList={adjacencyList} />
+            <AdjacencyList adjacencyList={props.adjacencyList} />
         </div>
     );
-}
+};
+
+const mapStateToProps = function (state) {
+    return {
+        adjacencyList: state.systemStateAdjacencyList
+    }
+};
+
+export default connect(mapStateToProps)(ReliabilityModelContainer);

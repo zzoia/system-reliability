@@ -15,20 +15,19 @@ class Graph extends React.Component {
     constructor(props) {
         super(props);
 
+        const graph = JSON.parse(JSON.stringify(props.value));
+
         this.state = {
             copiedNode: null,
-            graph: props.value,
+            graph,
             selected: null
         };
 
         this.GraphView = React.createRef();
     }
 
-    getModuleGraph() {
-        return {
-            nodes: [...this.state.graph.nodes],
-            edges: [...this.state.graph.edges]
-        }
+    onGraphChanged() {
+        this.props.onChange(JSON.parse(JSON.stringify(this.state.graph)))
     }
 
     // Helper to find the index of a given node
@@ -65,6 +64,8 @@ class Graph extends React.Component {
 
         graph.nodes[i] = viewNode;
         this.setState({ graph });
+
+        this.onGraphChanged();
     };
 
     // Node 'mouseUp' handler
@@ -96,7 +97,7 @@ class Graph extends React.Component {
         graph.nodes = [...graph.nodes, viewNode];
         this.setState({ graph });
 
-        this.props.onChange(this.getModuleGraph());
+        this.onGraphChanged();
     };
 
     // Deletes a node from the graph
@@ -114,7 +115,7 @@ class Graph extends React.Component {
 
         this.setState({ graph, selected: null });
 
-        this.props.onChange(this.getModuleGraph());
+        this.onGraphChanged();
     };
 
     // Creates a new node between two edges
@@ -136,7 +137,7 @@ class Graph extends React.Component {
             });
         }
 
-        this.props.onChange(this.getModuleGraph());
+        this.onGraphChanged();
     };
 
     // Called when an edge is reattached to a different target.
@@ -160,7 +161,7 @@ class Graph extends React.Component {
             selected: edge,
         });
 
-        this.props.onChange(this.getModuleGraph());
+        this.onGraphChanged();
     };
 
     // Called when an edge is deleted
@@ -173,7 +174,7 @@ class Graph extends React.Component {
             selected: null,
         });
 
-        this.props.onChange(this.getModuleGraph());
+        this.onGraphChanged();
     };
 
     onUndo = () => {
@@ -213,7 +214,7 @@ class Graph extends React.Component {
 
     setGraphRef = (el) => {
         this.GraphView = el;
-        this.props.onChange(this.getModuleGraph());
+        this.onGraphChanged();
     }
 
     render() {

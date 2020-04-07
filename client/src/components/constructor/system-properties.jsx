@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ModuleProperties from './module-properties';
 import { makeStyles, Button } from '@material-ui/core';
 
@@ -17,13 +17,19 @@ export default function SystemProperties({ modules, onInvestigate }) {
 
     const classes = useStyles();
 
-    const mappedModules = modules.map((mod, i) => ({ title: mod.title, id: mod.id, failureRate: (i + 1) * 0.0001, recoveryRate: (i + 1) * 0.01, left: 0 }));
+    const [mappedModules, setMappedModules] = useState([...modules]);
+
+    useEffect(() => {
+        setMappedModules([...modules]);
+    }, [modules]);
 
     const setModule = (data) => {
         const toUpdate = mappedModules.find(currData => currData.id === data.id);
         toUpdate.failureRate = data.failureRate;
         toUpdate.recoveryRate = data.recoveryRate;
         toUpdate.left = data.left;
+
+        setMappedModules([...mappedModules]);
     }
 
     const moduleEditors = mappedModules.map((mod) => (

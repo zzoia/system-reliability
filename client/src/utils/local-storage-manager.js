@@ -14,11 +14,21 @@ export default class LocalStorageManager {
 
     setAdjacencyList = (data) => this.setItem("adjacencyList", data);
 
-    getGraph = () => this.getItem("graph");
-
-    setGraph = (data) => this.setItem("graph", data);
-
     getSystemRequest = () => this.getItem("systemRequest");
 
     setSystemRequest = (data) => this.setItem("systemRequest", data);
 }
+
+export const loadState = () => {
+    try {
+        const serializedState = localStorage.getItem("state");
+        if (!serializedState) return undefined;
+        return JSON.parse(serializedState);
+    } catch {
+        return undefined;
+    }
+};
+
+export const saveState = (state) => {
+    localStorage.setItem("state", JSON.stringify(state));
+};

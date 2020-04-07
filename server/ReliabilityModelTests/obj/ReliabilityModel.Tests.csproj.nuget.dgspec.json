@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj": {}
+    "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj": {}
   },
   "projects": {
-    "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj": {
+    "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
+        "projectUniqueName": "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
         "projectName": "ReliabilityModel.Tests",
-        "projectPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
+        "projectPath": "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModelTests\\ReliabilityModel.Tests.csproj",
         "packagesPath": "C:\\Users\\Zoja\\.nuget\\packages\\",
-        "outputPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModelTests\\obj\\",
+        "outputPath": "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModelTests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -30,8 +30,8 @@
         "frameworks": {
           "netcoreapp3.1": {
             "projectReferences": {
-              "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj": {
-                "projectPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj"
+              "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj": {
+                "projectPath": "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj"
               }
             }
           }
@@ -81,14 +81,14 @@
         }
       }
     },
-    "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj": {
+    "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj",
+        "projectUniqueName": "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj",
         "projectName": "ReliabilityModel.Model",
-        "projectPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj",
+        "projectPath": "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModel\\ReliabilityModel.Model.csproj",
         "packagesPath": "C:\\Users\\Zoja\\.nuget\\packages\\",
-        "outputPath": "D:\\Study\\10 semester\\Надійність\\Лаби\\server\\ReliabilityModel\\obj\\",
+        "outputPath": "d:\\Study\\10 semester\\Основи теорії надійності програмних систем\\Лаби\\server\\ReliabilityModel\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
