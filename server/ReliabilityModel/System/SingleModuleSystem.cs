@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using NotImplementedException = System.NotImplementedException;
 
 namespace ReliabilityModel.Model.System
 {
@@ -66,5 +67,10 @@ namespace ReliabilityModel.Model.System
 
             return state.IsWorking;
         }
+
+        public override IReadOnlyCollection<SingleModuleSystem> Flatten() => new List<SingleModuleSystem>
+        {
+            this
+        };
     }
 }

@@ -134,7 +134,7 @@ namespace ReliabilityModel.Model
 
         private IList<SystemState> GetAllPossibleStates()
         {
-            IReadOnlyList<SingleModuleSystem> singleModules = new SubSystemModuleAggregationVisitor().VisitSubSystem(_system);
+            IReadOnlyCollection<SingleModuleSystem> singleModules = _system.Flatten();
 
             IReadOnlyList<IReadOnlyList<ModuleState>> modulesStates = singleModules
                 .Select(singleModuleSystem => singleModuleSystem.GetPossibleNextStates())

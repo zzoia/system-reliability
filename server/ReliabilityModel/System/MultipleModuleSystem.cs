@@ -11,10 +11,7 @@ namespace ReliabilityModel.Model.System
             SubSystems = subSystems;
             Dependency = dependency;
 
-            foreach (System subSystem in SubSystems)
-            {
-                subSystem.Parent = this;
-            }
+            foreach (System subSystem in SubSystems) subSystem.Parent = this;
         }
 
         public ReliabilityDependency Dependency { get; }
@@ -24,22 +21,14 @@ namespace ReliabilityModel.Model.System
         public override bool IsStateTerminal(SystemState systemState)
         {
             foreach (System subSystem in SubSystems)
-            {
                 if (subSystem.IsStateTerminal(systemState))
                 {
-                    if (Dependency == ReliabilityDependency.And)
-                    {
-                        return true;
-                    }
+                    if (Dependency == ReliabilityDependency.And) return true;
                 }
                 else
                 {
-                    if (Dependency == ReliabilityDependency.Or)
-                    {
-                        return false;
-                    }
+                    if (Dependency == ReliabilityDependency.Or) return false;
                 }
-            }
 
             return Dependency == ReliabilityDependency.Or;
         }
@@ -49,41 +38,29 @@ namespace ReliabilityModel.Model.System
             switch (Dependency)
             {
                 case ReliabilityDependency.And:
+                {
+                    var waitingRecoveryFound = false;
+                    foreach (System subSystem in SubSystems)
                     {
-                        var waitingRecoveryFound = false;
-                        foreach (System subSystem in SubSystems)
-                        {
-                            if (subSystem.IsStateTerminal(systemState))
-                            {
-                                return false;
-                            }
+                        if (subSystem.IsStateTerminal(systemState)) return false;
 
-                            if (subSystem.WaitingRecovery(systemState))
-                            {
-                                waitingRecoveryFound = true;
-                            }
-                        }
-
-                        return waitingRecoveryFound;
+                        if (subSystem.WaitingRecovery(systemState)) waitingRecoveryFound = true;
                     }
+
+                    return waitingRecoveryFound;
+                }
                 case ReliabilityDependency.Or:
+                {
+                    var waitingRecoveryFound = false;
+                    foreach (System subSystem in SubSystems)
                     {
-                        var waitingRecoveryFound = false;
-                        foreach (System subSystem in SubSystems)
-                        {
-                            if (subSystem.WaitingRecovery(systemState))
-                            {
-                                waitingRecoveryFound = true;
-                            }
+                        if (subSystem.WaitingRecovery(systemState)) waitingRecoveryFound = true;
 
-                            if (subSystem.IsWorking(systemState))
-                            {
-                                return false;
-                            }
-                        }
-
-                        return waitingRecoveryFound;
+                        if (subSystem.IsWorking(systemState)) return false;
                     }
+
+                    return waitingRecoveryFound;
+                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -102,6 +79,24 @@ namespace ReliabilityModel.Model.System
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public override IReadOnlyCollection<SingleModuleSystem> Flatten()
+        {
+            var allSingleModules = new List<SingleModuleSystem>();
+
+            IEnumerable<SingleModuleSystem> singleModules = SubSystems.OfType<SingleModuleSystem>();
+            allSingleModules.AddRange(singleModules);
+
+            IEnumerable<MultipleModuleSystem> multipleModuleSubSystems = SubSystems.OfType<MultipleModuleSystem>();
+
+            foreach (MultipleModuleSystem moduleSubSystem in multipleModuleSubSystems)
+            {
+                IReadOnlyCollection<SingleModuleSystem> singleModuleSystems = moduleSubSystem.Flatten();
+                allSingleModules.AddRange(singleModuleSystems);
+            }
+
+            return allSingleModules;
         }
     }
 }

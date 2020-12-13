@@ -1,4 +1,6 @@
-﻿namespace ReliabilityModel.Model.System
+﻿using System.Collections.Generic;
+
+namespace ReliabilityModel.Model.System
 {
     public abstract class System
     {
@@ -9,5 +11,7 @@
         public abstract bool WaitingRecovery(SystemState systemState);
 
         public abstract bool IsWorking(SystemState systemState);
+
+        public abstract IReadOnlyCollection<SingleModuleSystem> Flatten();
     }
 }
