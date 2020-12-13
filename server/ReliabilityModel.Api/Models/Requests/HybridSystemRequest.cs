@@ -1,4 +1,4 @@
-﻿using ReliabilityModel.Model;
+﻿using ReliabilityModel.Model.Enums;
 
 namespace ReliabilityModel.Api.Models.Requests
 {

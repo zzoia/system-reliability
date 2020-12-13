@@ -5,6 +5,7 @@ import CardContent from '@material-ui/core/CardContent';
 
 import Plotly from "plotly.js-basic-dist";
 import createPlotlyComponent from "react-plotly.js/factory";
+
 const Plot = createPlotlyComponent(Plotly);
 
 const useStyles = makeStyles(theme => ({
@@ -13,7 +14,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function WorkingProbabilityPlot({ plotData }) {
+export const WorkingProbabilityPlot = ({ plotData }) => {
 
     const classes = useStyles();
 
@@ -40,5 +41,6 @@ export default function WorkingProbabilityPlot({ plotData }) {
             </Card>
         </div>
     );
+};
 
-}
+export default WorkingProbabilityPlot;

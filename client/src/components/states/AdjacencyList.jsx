@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import SystemStateTransition from './system-state-transition';
+import SystemStateTransition from './SystemStateTransition';
 import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function AdjacencyList({ adjacencyList }) {
+export const AdjacencyList = ({ adjacencyList }) => {
     const classes = useStyles();
 
     if (!adjacencyList.length) {
@@ -34,4 +34,6 @@ export default function AdjacencyList({ adjacencyList }) {
             {states}
         </div>
     );
-}
+};
+
+export default AdjacencyList;

@@ -1,6 +1,6 @@
-import { DEPENDENCY_TYPES } from "./constants";
-import { ModuleCollection } from "./module-collection";
-import { endNodeId } from "./graph-data";
+import { DEPENDENCY_TYPES } from "../constants";
+import { ModuleCollection } from "../system/ModuleCollection";
+import { endNodeId } from "../GraphData";
 
 export class SequentialParallel {
 

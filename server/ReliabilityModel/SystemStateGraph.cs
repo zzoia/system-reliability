@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Research.Oslo;
+using ReliabilityModel.Model.Helpers;
 using ReliabilityModel.Model.System;
 
 namespace ReliabilityModel.Model
@@ -19,7 +20,7 @@ namespace ReliabilityModel.Model
             Transitions = GetPossibleTransitions(includeTerminal);
         }
 
-        public IReadOnlyList<SystemState> AllPossibleStates => (IReadOnlyList<SystemState>)_allPossibleStates;
+        public IReadOnlyList<SystemState> AllPossibleStates => (IReadOnlyList<SystemState>) _allPossibleStates;
 
         public IReadOnlyList<PossibleTransitions> Transitions { get; }
 
@@ -34,7 +35,9 @@ namespace ReliabilityModel.Model
                 {
                     foreach (SystemState toState in AllPossibleStates)
                     {
-                        bool canTransitTo = fromState.GetTransitionRate(toState, out double rate, out bool isRecovering);
+                        bool canTransitTo =
+                            fromState.GetTransitionRate(toState, out double rate, out bool isRecovering);
+
                         if (canTransitTo)
                         {
                             transition.ToSystemStates.Add(new SystemStateTransition
@@ -52,17 +55,18 @@ namespace ReliabilityModel.Model
 
             if (!includeTerminal)
             {
-                var allDestinations = transitions
+                List<SystemState> allDestinations = transitions
                     .SelectMany(transition => transition.ToSystemStates)
                     .Select(transition => transition.ToSystemState)
                     .ToList();
 
-                var allSources = transitions
+                List<SystemState> allSources = transitions
                     .Select(transition => transition.SystemState)
                     .ToList();
 
                 transitions = transitions
-                    .Where(transition => allDestinations.Contains(transition.SystemState) || transition.ToSystemStates.Any())
+                    .Where(transition =>
+                        allDestinations.Contains(transition.SystemState) || transition.ToSystemStates.Any())
                     .ToList();
 
                 _allPossibleStates = transitions.Select(transition => transition.SystemState).ToList();
@@ -81,10 +85,7 @@ namespace ReliabilityModel.Model
                 PossibleTransitions transitionsForState = Transitions
                     .SingleOrDefault(transition => transition.SystemState == currentState);
 
-                if (transitionsForState == null)
-                {
-                    continue;
-                }
+                if (transitionsForState == null) continue;
 
                 foreach (SystemStateTransition nextState in transitionsForState.ToSystemStates)
                 {
@@ -104,27 +105,26 @@ namespace ReliabilityModel.Model
 
             var initial = new Vector(Enumerable.Repeat(0.0, AllPossibleStates.Count).ToArray());
             initial[0] = 1.0;
-            var solution = Ode.RK547M(0, initial, (_, vector) =>
+            IEnumerable<SolPoint> solution = Ode.RK547M(0, initial, (_, vector) =>
             {
-                double[] result = new double[vector.Length];
+                var result = new double[vector.Length];
                 for (var state = 0; state < result.Length; state++)
                 {
                     result[state] = 0;
                     for (var component = 0; component < result.Length; component++)
-                    {
                         result[state] += equations[state, component] * vector[component];
-                    }
                 }
+
                 return new Vector(result);
             });
 
             int[] workingIndices = AllPossibleStates
-                .Select((state, index) => new { index, state.IsWorking })
+                .Select((state, index) => new {index, state.IsWorking})
                 .Where(state => state.IsWorking)
                 .Select(state => state.index)
                 .ToArray();
 
-            var points = solution.SolveFromToStep(from, to, step).ToArray();
+            SolPoint[] points = solution.SolveFromToStep(from, to, step).ToArray();
             return points.Select(point => new WorkingProbability
             {
                 Time = point.T,
@@ -136,11 +136,11 @@ namespace ReliabilityModel.Model
         {
             IReadOnlyCollection<SingleModuleSystem> singleModules = _system.Flatten();
 
-            IReadOnlyList<IReadOnlyList<ModuleState>> modulesStates = singleModules
-                .Select(singleModuleSystem => singleModuleSystem.GetPossibleNextStates())
+            IReadOnlyList<IReadOnlyList<ModuleState>> allModulesStates = singleModules
+                .Select(singleModule => singleModule.GetPossibleNextStates())
                 .ToList();
 
-            int[] maxValues = modulesStates.Select(list => list.Count - 1).ToArray();
+            int[] maxValues = allModulesStates.Select(singleModuleStates => singleModuleStates.Count - 1).ToArray();
             var systemStates = new List<int[]>
             {
                 Enumerable.Repeat(0, maxValues.Length).ToArray()
@@ -153,7 +153,8 @@ namespace ReliabilityModel.Model
             }
 
             return systemStates
-                .Select((indices, index) => SystemState.FromModuleStatesIndices(_system, indices, modulesStates, index))
+                .Select((indices, index) =>
+                    SystemState.FromModuleStatesIndices(_system, indices, allModulesStates, index))
                 .ToList();
         }
     }

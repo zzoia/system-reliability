@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ReliabilityModel.Model;
+using ReliabilityModel.Model.Enums;
 using ReliabilityModel.Model.System;
 
 namespace ReliabilityModel.Api.Models.Requests
@@ -13,7 +13,7 @@ namespace ReliabilityModel.Api.Models.Requests
 
         public override Model.System.System ToSystem()
         {
-            var subSystems = Members.Select(member => member.ToSystem()).ToList();
+            IReadOnlyList<Model.System.System> subSystems = Members.Select(member => member.ToSystem()).ToList();
             return new MultipleModuleSystem(subSystems, Dependency);
         }
     }

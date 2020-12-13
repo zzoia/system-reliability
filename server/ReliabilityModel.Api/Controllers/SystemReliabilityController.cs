@@ -40,11 +40,16 @@ namespace ReliabilityModel.Api.Controllers
                 SystemRequest systemRequest = HybridToSystemRequest(plotRequest.HybridSystemRequest, single =>
                 {
                     if (single.ModuleName == plotRequest.ModuleName)
+                    {
                         single.FailureRate = Math.Round(failureRate, 7, MidpointRounding.AwayFromZero);
+                    }
+
                     return single;
                 });
+
                 var system = (MultipleModuleSystem) systemRequest.ToSystem();
                 var graph = new SystemStateGraph(system, false);
+
                 IReadOnlyList<WorkingProbability> plotData =
                     graph.GetProbability(plotRequest.FromTime, plotRequest.ToTime, plotRequest.Step);
 
@@ -57,8 +62,10 @@ namespace ReliabilityModel.Api.Controllers
             }
 
             SystemRequest originalRequest = HybridToSystemRequest(plotRequest.HybridSystemRequest, _ => _);
+
             var originalSystem = (MultipleModuleSystem) originalRequest.ToSystem();
             var originalGraph = new SystemStateGraph(originalSystem, false);
+
             IReadOnlyList<WorkingProbability> originalPlotData =
                 originalGraph.GetProbability(plotRequest.FromTime, plotRequest.ToTime, plotRequest.Step);
 
@@ -84,6 +91,7 @@ namespace ReliabilityModel.Api.Controllers
 
             var result = new List<List<double>>();
             var sb = new StringBuilder();
+
             for (var row = 0; row < matrix.GetLength(0); row++)
             {
                 sb.Append($"P{row + 1}(t)/dt = ");
@@ -128,7 +136,7 @@ namespace ReliabilityModel.Api.Controllers
             {
                 ModuleType.Multiple => new MultipleModuleSystemRequest
                 {
-                    Dependency = hybridRequest.Dependency.Value,
+                    Dependency = hybridRequest.Dependency!.Value,
                     Members = hybridRequest.Members.Select(member => HybridToSystemRequest(member, postConfigure))
                 },
                 ModuleType.Single => postConfigure(new SingleModuleSystemRequest

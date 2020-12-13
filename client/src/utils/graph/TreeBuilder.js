@@ -1,6 +1,6 @@
-import { Node } from "./node";
-import { NODE_KEY } from './graph-config';
-import { startNodeId, endNodeId } from './graph-data';
+import { Node } from "./Node";
+import { NODE_KEY } from '../GraphConfig';
+import { startNodeId, endNodeId } from '../GraphData';
 
 export class TreeBuilder {
 

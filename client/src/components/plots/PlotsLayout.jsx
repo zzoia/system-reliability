@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import WorkingProbabilityPlot from './working-probability-plot';
+import WorkingProbabilityPlot from './WorkingProbabilityPlot';
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -10,7 +10,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function PlotsLayout({ plots }) {
+export const PlotsLayout = ({ plots }) => {
 
     const classes = useStyles();
 
@@ -20,3 +20,5 @@ export default function PlotsLayout({ plots }) {
         </div>
     );
 }
+
+export default PlotsLayout;

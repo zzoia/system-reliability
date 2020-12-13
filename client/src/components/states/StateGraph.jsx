@@ -74,7 +74,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function StateGraph({ stateGraph }) {
+export const StateGraph = ({ stateGraph }) => {
 
     const classes = useStyles();
 
@@ -89,4 +89,6 @@ export default function StateGraph({ stateGraph }) {
                     : (<Alert severity="error">Граф завеликий!</Alert>)
             }
         </div>);
-}
+};
+
+export default StateGraph;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import AdjacencyList from './adjacency-list';
+import AdjacencyList from './AdjacencyList';
 import { makeStyles } from '@material-ui/core/styles';
-import StateGraph from './state-graph';
+import StateGraph from './StateGraph';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { connect } from 'react-redux';
@@ -79,18 +79,18 @@ const getGraph = (adjacencyList, includeTerminal) => {
     };
 };
 
-function ReliabilityModelContainer(props) {
+const ReliabilityModelContainer = ({ adjacencyList }) => {
 
     const classes = useStyles();
     const [includeTerminal, setIncludeTerminal] = useState(false);
 
-    const [graphData, setGraphData] = useState(getGraph(props.adjacencyList, includeTerminal));
+    const [graphData, setGraphData] = useState(getGraph(adjacencyList, includeTerminal));
 
     const handleGraphFilter = (event) => {
         const include = event.target.checked;
         setIncludeTerminal(include);
 
-        setGraphData(getGraph(props.adjacencyList, include))
+        setGraphData(getGraph(adjacencyList, include))
     }
 
     return (
@@ -108,7 +108,7 @@ function ReliabilityModelContainer(props) {
                 />
             </div>
             <StateGraph stateGraph={graphData} />
-            <AdjacencyList adjacencyList={props.adjacencyList} />
+            <AdjacencyList adjacencyList={adjacencyList} />
         </div>
     );
 };

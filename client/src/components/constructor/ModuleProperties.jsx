@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { NODE_KEY } from '../../utils/graph-config';
+import { NODE_KEY } from '../../utils/GraphConfig';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -20,7 +20,8 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function ModuleProperties({ moduleData, onChange }) {
+export const ModuleProperties = ({ moduleData, onChange }) => {
+
   const classes = useStyles();
 
   const [recoveryRate, setRecoveryRate] = useState(moduleData.recoveryRate);
@@ -76,3 +77,5 @@ export default function ModuleProperties({ moduleData, onChange }) {
     </form>
   );
 }
+
+export default ModuleProperties;

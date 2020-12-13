@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function ValidatedJsonGraph({ json }) {
+export const ValidatedJsonGraph = ({ json }) => {
 
     const classes = useStyles();
 
@@ -37,3 +37,5 @@ export default function ValidatedJsonGraph({ json }) {
         </div>
     );
 }
+
+export default ValidatedJsonGraph;

@@ -1,4 +1,4 @@
-import { SingleModule } from "./single-module";
+import { SingleModule } from "../system/SingleModule";
 
 export class DepthFirstSearchTreeValidator {
 

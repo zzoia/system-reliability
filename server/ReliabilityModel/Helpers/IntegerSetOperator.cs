@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace ReliabilityModel.Model
+namespace ReliabilityModel.Model.Helpers
 {
     public class IntegerSetOperator
     {

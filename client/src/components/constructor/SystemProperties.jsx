@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ModuleProperties from './module-properties';
+import ModuleProperties from './ModuleProperties';
 import { makeStyles, Button } from '@material-ui/core';
 
 const useStyles = makeStyles({
@@ -13,7 +13,7 @@ const useStyles = makeStyles({
     }
 });
 
-export default function SystemProperties({ modules, onInvestigate }) {
+export const SystemProperties = ({ modules, onInvestigate }) => {
 
     const classes = useStyles();
 
@@ -49,5 +49,6 @@ export default function SystemProperties({ modules, onInvestigate }) {
                 onClick={() => onInvestigate(mappedModules)}>Дослідити систему</Button>
         </div>
     );
-
 }
+
+export default SystemProperties;

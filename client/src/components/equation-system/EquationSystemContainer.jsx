@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { CardContent, Card } from '@material-ui/core';
-import LocalStorageManager from '../../utils/local-storage-manager';
-import { statusToColor } from '../states/reliability-model-container'
-import EquationRightSide from './equation-right-side';
+import { statusToColor } from '../states/ReliabilityModelContainer'
+import EquationRightSide from './EquationRightSide';
 import { connect } from 'react-redux';
+import { getEquationSystem } from "../../actions/api";
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-function EquationSystemContainer(props) {
+const EquationSystemContainer = ({ systemRequest }) => {
 
     const classes = useStyles();
 
@@ -47,21 +47,14 @@ function EquationSystemContainer(props) {
     const [coeffs, setCoeffs] = useState([]);
 
     const getEquation = async () => {
-
-        const response = await fetch("http://localhost:53294/systemreliability/equation-system", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(props.systemRequest)
-        });
-
-        const data = await response.json();
+        const data = await getEquationSystem(systemRequest);
         setStates(data.systemStates);
         setCoeffs(data.coefficients)
     };
 
     useEffect(() => {
         getEquation();
-    }, [props.systemRequest]);
+    }, [systemRequest]);
 
     return (
         <div className={classes.container}>

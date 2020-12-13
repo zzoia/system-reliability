@@ -1,4 +1,4 @@
-import { SubSystem } from "./sub-system";
+import { SubSystem } from "./SubSystem";
 
 export class ModuleCollection extends SubSystem {
 

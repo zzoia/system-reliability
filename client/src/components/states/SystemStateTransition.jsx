@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function SystemStateTransition({ transition }) {
+export const SystemStateTransition = ({ transition }) => {
 
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
@@ -60,7 +60,7 @@ export default function SystemStateTransition({ transition }) {
                 variant={mod.isWorking ? "outlined" : "default"}
                 size="small"
                 icon={mod.isWorking ? <AddIcon /> : <RemoveIcon />}
-                label={(mod.name) + (mod.left == null ? "" :` (${mod.left})`)}
+                label={(mod.name) + (mod.left == null ? "" : ` (${mod.left})`)}
                 clickable
                 className={classes.chip}
             />
@@ -95,4 +95,6 @@ export default function SystemStateTransition({ transition }) {
             <Divider />
         </List>
     );
-}
+};
+
+export default SystemStateTransition;

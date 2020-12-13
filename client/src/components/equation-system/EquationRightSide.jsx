@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function EquationRightSide({ coeffs }) {
+export const EquationRightSide = ({ coeffs }) => {
 
     const classes = useStyles();
 
@@ -30,5 +30,7 @@ export default function EquationRightSide({ coeffs }) {
         <div className={classes.row}>
             {data}
         </div>
-    )
-}
+    );
+};
+
+export default EquationRightSide;

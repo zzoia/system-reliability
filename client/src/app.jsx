@@ -1,14 +1,14 @@
 import React from 'react';
-import AppContainer from './components/constructor/app-container';
-import ReliabilityModelContainer from './components/states/reliability-model-container';
+import AppContainer from './components/constructor/AppContainer';
+import ReliabilityModelContainer from './components/states/ReliabilityModelContainer';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import Tabs from '@material-ui/core/Tabs';
 import LinkTab from '@material-ui/core/Tab';
 import AppBar from '@material-ui/core/AppBar';
 import { makeStyles } from '@material-ui/core/styles';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import PlotsContainer from './components/plots/plots-container';
-import EquationSystemContainer from './components/equation-system/equation-system-container';
+import PlotsContainer from './components/plots/PlotsContainer';
+import EquationSystemContainer from './components/equation-system/EquationSystemContainer';
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -57,15 +57,15 @@ const paths = {
   reliabilityModel: "/reliability-model",
   plots: "/plots",
   equationSystem: "/equation-system"
-}
+};
 
-export default function App() {
+export const App = () => {
 
   const classes = useStyles();
 
   const [value, setValue] = React.useState(getUrlIndex());
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (_, newValue) => {
     setValue(newValue);
   };
 
@@ -93,3 +93,4 @@ export default function App() {
   );
 }
 
+export default App;

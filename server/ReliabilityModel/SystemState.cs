@@ -46,9 +46,7 @@ namespace ReliabilityModel.Model
                 return false;
             }
 
-            isRecovering = transition.From.IsValidStateChangeTo(transition.To)
-                   && !transition.From.IsWorking
-                   && transition.To.IsWorking;
+            isRecovering = !transition.From.IsWorking && transition.To.IsWorking;
 
             transitionRate = isRecovering
                 ? transition.From.Module.RecoveryRate

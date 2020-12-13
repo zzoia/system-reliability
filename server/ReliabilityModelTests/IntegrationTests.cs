@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using ReliabilityModel.Model;
+using ReliabilityModel.Model.Enums;
 using ReliabilityModel.Model.Formatters;
 using ReliabilityModel.Model.Formatters.Filtering;
 using ReliabilityModel.Model.System;

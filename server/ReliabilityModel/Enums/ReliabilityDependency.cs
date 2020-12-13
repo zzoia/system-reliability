@@ -1,4 +1,4 @@
-﻿namespace ReliabilityModel.Model
+﻿namespace ReliabilityModel.Model.Enums
 {
     public enum ReliabilityDependency
     {

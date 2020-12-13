@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { DefaultSystemGraph } from "../utils/graph-data";
+import { DefaultSystemGraph } from "../utils/GraphData";
 
 const systemSchemeGraphSlice = createSlice({
-    name: "system-scheme-graph",
+    name: "systemSchemeGraph",
     initialState: {
         systemScheme: DefaultSystemGraph
     },

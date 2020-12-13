@@ -2,7 +2,7 @@ import {
     EMPTY_EDGE_TYPE,
     FORK_JOIN_NODE,
     SKINNY_TYPE,
-} from './graph-config';
+} from './GraphConfig';
 
 export const startNodeId = "start";
 export const endNodeId = "end";
