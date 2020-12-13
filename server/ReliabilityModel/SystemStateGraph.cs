@@ -137,7 +137,7 @@ namespace ReliabilityModel.Model
             IReadOnlyList<SingleModuleSystem> singleModules = new SubSystemModuleAggregationVisitor().VisitSubSystem(_system);
 
             IReadOnlyList<IReadOnlyList<ModuleState>> modulesStates = singleModules
-                .Select(singleModuleSystem => singleModuleSystem.GetModuleStates())
+                .Select(singleModuleSystem => singleModuleSystem.GetPossibleNextStates())
                 .ToList();
 
             int[] maxValues = modulesStates.Select(list => list.Count - 1).ToArray();

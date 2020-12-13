@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ReliabilityModel.Model.Responses
+namespace ReliabilityModel.Api.Models.Responses
 {
     public class AdjacencyModel
     {

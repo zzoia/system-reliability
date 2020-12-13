@@ -1,7 +1,7 @@
-﻿using ReliabilityModel.Model;
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
+using ReliabilityModel.Model.Formatters.Filtering;
 
 namespace ReliabilityModel.Model.Formatters
 {

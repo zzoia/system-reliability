@@ -1,4 +1,6 @@
-﻿namespace ReliabilityModel.Model.Formatters
+﻿using ReliabilityModel.Model.Formatters.Filtering;
+
+namespace ReliabilityModel.Model.Formatters
 {
     public class FullGraphFormatter : GraphFormatter
     {

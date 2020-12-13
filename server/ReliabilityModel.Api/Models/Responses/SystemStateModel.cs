@@ -1,7 +1,7 @@
-﻿using ReliabilityModel.Model.Requests;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ReliabilityModel.Api.Models.Requests;
 
-namespace ReliabilityModel.Model.Responses
+namespace ReliabilityModel.Api.Models.Responses
 {
     public class SystemStateModel
     {

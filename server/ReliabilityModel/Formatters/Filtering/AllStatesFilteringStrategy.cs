@@ -1,6 +1,4 @@
-﻿using ReliabilityModel.Model;
-
-namespace ReliabilityModel.Model.Formatters
+﻿namespace ReliabilityModel.Model.Formatters.Filtering
 {
     public class AllStatesFilteringStrategy : StateFilteringStrategy
     {

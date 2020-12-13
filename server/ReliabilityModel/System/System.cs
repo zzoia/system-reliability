@@ -1,6 +1,4 @@
-﻿using ReliabilityModel.Model;
-
-namespace ReliabilityModel.Model.System
+﻿namespace ReliabilityModel.Model.System
 {
     public abstract class System
     {

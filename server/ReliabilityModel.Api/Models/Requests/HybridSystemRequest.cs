@@ -1,4 +1,6 @@
-﻿namespace ReliabilityModel.Model.Requests
+﻿using ReliabilityModel.Model;
+
+namespace ReliabilityModel.Api.Models.Requests
 {
     public class HybridSystemRequest
     {

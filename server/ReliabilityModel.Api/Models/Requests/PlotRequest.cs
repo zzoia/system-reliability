@@ -1,6 +1,4 @@
-﻿using ReliabilityModel.Model.Requests;
-
-namespace ReliabilityModel.Api.Controllers
+﻿namespace ReliabilityModel.Api.Models.Requests
 {
     public class PlotRequest
     {

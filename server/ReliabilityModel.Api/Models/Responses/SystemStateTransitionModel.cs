@@ -1,4 +1,4 @@
-﻿namespace ReliabilityModel.Model.Responses
+﻿namespace ReliabilityModel.Api.Models.Responses
 {
     public class SystemStateTransitionModel
     {

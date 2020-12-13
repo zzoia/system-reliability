@@ -1,9 +1,7 @@
-﻿using ReliabilityModel.Model;
-
-namespace ReliabilityModel.Model.Requests
+﻿namespace ReliabilityModel.Api.Models.Requests
 {
     public abstract class SystemRequest
     {
-        public abstract System.System ToSystem();
+        public abstract Model.System.System ToSystem();
     }
 }

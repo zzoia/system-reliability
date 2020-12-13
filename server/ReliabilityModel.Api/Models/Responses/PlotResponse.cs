@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ReliabilityModel.Model;
 
-namespace ReliabilityModel.Api.Controllers
+namespace ReliabilityModel.Api.Models.Responses
 {
     public class PlotResponse
     {

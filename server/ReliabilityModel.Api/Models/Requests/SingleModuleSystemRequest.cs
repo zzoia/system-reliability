@@ -1,6 +1,6 @@
 ﻿using ReliabilityModel.Model.System;
 
-namespace ReliabilityModel.Model.Requests
+namespace ReliabilityModel.Api.Models.Requests
 {
     public class SingleModuleSystemRequest : SystemRequest
     {
@@ -12,7 +12,7 @@ namespace ReliabilityModel.Model.Requests
 
         public int? Left { get; set; }
 
-        public override System.System ToSystem()
+        public override Model.System.System ToSystem()
         {
             return new SingleModuleSystem(ModuleName, Left)
             {

@@ -5,9 +5,9 @@ namespace ReliabilityModel.Model
 {
     public class ModuleState
     {
-        public ModuleState(SingleModuleSystem module, bool isWorking, int? left = null)
+        public ModuleState(SingleModuleSystem module, bool isWorking, int? recoveriesLeft)
         {
-            Left = left;
+            RecoveriesLeft = recoveriesLeft;
 
             IsWorking = isWorking;
             Module = module;
@@ -17,31 +17,34 @@ namespace ReliabilityModel.Model
 
         public bool IsWorking { get; }
 
-        public bool WaitingRecovery => !IsWorking && (!Left.HasValue || Left.Value > 0);
+        public bool WaitingRecovery => !IsWorking && (!RecoveriesLeft.HasValue || RecoveriesLeft.Value > 0);
 
-        public bool IsTerminal => Left == 0 && !IsWorking;
+        public bool IsTerminal => RecoveriesLeft == 0 && !IsWorking;
 
-        public int? Left { get; }
+        public int? RecoveriesLeft { get; }
 
         public bool IsValidStateChangeTo(ModuleState anotherModuleState)
         {
-            if (!Left.HasValue && anotherModuleState.Left.HasValue || Left.HasValue && !anotherModuleState.Left.HasValue)
+            if (!RecoveriesLeft.HasValue && anotherModuleState.RecoveriesLeft.HasValue || 
+                RecoveriesLeft.HasValue && !anotherModuleState.RecoveriesLeft.HasValue)
             {
-                throw new ArgumentException("Cannot compare states with infinite and finite recovery numbers.", nameof(anotherModuleState));
+                throw new ArgumentException(
+                    "Cannot compare states with infinite and finite recovery numbers.",
+                    nameof(anotherModuleState));
             }
 
-            bool infiniteRecoveryPossible = Left == null;
+            bool infiniteRecoveryPossible = RecoveriesLeft == null;
             if (IsWorking != anotherModuleState.IsWorking && infiniteRecoveryPossible)
             {
                 return true;
             }
 
-            if (IsWorking && !anotherModuleState.IsWorking && Left == anotherModuleState.Left)
+            if (IsWorking && !anotherModuleState.IsWorking && RecoveriesLeft == anotherModuleState.RecoveriesLeft)
             {
                 return true;
             }
 
-            if (!IsWorking && anotherModuleState.IsWorking && Left == anotherModuleState.Left + 1)
+            if (!IsWorking && anotherModuleState.IsWorking && RecoveriesLeft == anotherModuleState.RecoveriesLeft + 1)
             {
                 return true;
             }
@@ -56,20 +59,20 @@ namespace ReliabilityModel.Model
                 return false;
             }
 
-            return otherState.IsWorking == IsWorking && otherState.Left == Left;
+            return otherState.IsWorking == IsWorking && otherState.RecoveriesLeft == RecoveriesLeft;
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = Left.GetHashCode();
+                int hashCode = RecoveriesLeft.GetHashCode();
                 hashCode = hashCode * 397 ^ (Module != null ? Module.GetHashCode() : 0);
                 hashCode = hashCode * 397 ^ IsWorking.GetHashCode();
                 return hashCode;
             }
         }
 
-        public override string ToString() => $"{(IsWorking ? "1" : "0")}{(Left.HasValue ? $"[{Left.ToString()}]" : "")}";
+        public override string ToString() => $"{(IsWorking ? 1.ToString() : 0.ToString())}{(RecoveriesLeft.HasValue ? $"[{RecoveriesLeft}]" : string.Empty)}";
     }
 }

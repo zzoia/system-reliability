@@ -1,4 +1,4 @@
-﻿namespace ReliabilityModel.Model.Requests
+﻿namespace ReliabilityModel.Api.Models.Requests
 {
     public enum SystemStateStatus
     {

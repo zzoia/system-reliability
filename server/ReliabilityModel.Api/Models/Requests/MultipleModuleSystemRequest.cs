@@ -1,8 +1,9 @@
-﻿using ReliabilityModel.Model.System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using ReliabilityModel.Model;
+using ReliabilityModel.Model.System;
 
-namespace ReliabilityModel.Model.Requests
+namespace ReliabilityModel.Api.Models.Requests
 {
     public class MultipleModuleSystemRequest : SystemRequest
     {
@@ -10,7 +11,7 @@ namespace ReliabilityModel.Model.Requests
 
         public IEnumerable<SystemRequest> Members { get; set; }
 
-        public override System.System ToSystem()
+        public override Model.System.System ToSystem()
         {
             var subSystems = Members.Select(member => member.ToSystem()).ToList();
             return new MultipleModuleSystem(subSystems, Dependency);

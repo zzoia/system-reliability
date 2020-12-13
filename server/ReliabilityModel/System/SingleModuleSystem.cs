@@ -1,5 +1,4 @@
-﻿using ReliabilityModel.Model;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ReliabilityModel.Model.System
@@ -8,7 +7,7 @@ namespace ReliabilityModel.Model.System
     {
         private readonly int? _recoveryNumber;
 
-        public SingleModuleSystem(string name, int? recoveryNumber = null)
+        public SingleModuleSystem(string name, int? recoveryNumber)
         {
             _recoveryNumber = recoveryNumber;
             Name = name;
@@ -20,7 +19,7 @@ namespace ReliabilityModel.Model.System
 
         public string Name { get; }
 
-        public IReadOnlyList<ModuleState> GetModuleStates()
+        public IReadOnlyList<ModuleState> GetPossibleNextStates()
         {
             var possibleModuleStates = new List<ModuleState>();
             if (_recoveryNumber.HasValue)
@@ -37,8 +36,8 @@ namespace ReliabilityModel.Model.System
             }
             else
             {
-                possibleModuleStates.Add(new ModuleState(this, true));
-                possibleModuleStates.Add(new ModuleState(this, false));
+                possibleModuleStates.Add(new ModuleState(this, true, null));
+                possibleModuleStates.Add(new ModuleState(this, false, null));
             }
 
             return possibleModuleStates;

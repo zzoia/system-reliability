@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ReliabilityModel.Model;
 using ReliabilityModel.Model.Formatters;
+using ReliabilityModel.Model.Formatters.Filtering;
 using ReliabilityModel.Model.System;
 using Xunit;
 
@@ -11,17 +12,15 @@ namespace ReliabilityModel.Tests
     public class IntegrationTests
     {
         [Theory]
-        [InlineData(new object [] { true, "1 0,887 0,787 0,698 0,619 0,549 " })]
-        [InlineData(new object[] { false, "1 0,887 0,787 0,698 0,619 0,549 " })]
+        [InlineData(true, "1 0,887 0,787 0,698 0,619 0,549 ")]
+        [InlineData(false, "1 0,887 0,787 0,698 0,619 0,549 ")]
         public void GetProbability_ThreeModulesTwoParallelNoRecovery_Calculates(bool isTerminal, string expected)
         {
-            string PlotDataToString(IReadOnlyList<WorkingProbability> data)
+            static string PlotDataToString(IEnumerable<WorkingProbability> data)
             {
                 var sb = new StringBuilder();
                 foreach (WorkingProbability probability in data)
-                {
                     sb.Append(Math.Round(probability.AggregatedProbability, 3) + " ");
-                }
                 return sb.ToString();
             }
 
@@ -29,24 +28,25 @@ namespace ReliabilityModel.Tests
             var system = new MultipleModuleSystem(
                 new List<Model.System.System>
                 {
-                    new SingleModuleSystem("I", 0){
-                    FailureRate = 0.0001
+                    new SingleModuleSystem("I", 0)
+                    {
+                        FailureRate = 0.0001
                     },
                     new SingleModuleSystem("II", 0)
                     {
                         FailureRate = 0.0002
                     },
-                    new SingleModuleSystem("III", 0){FailureRate=0.0003}
+                    new SingleModuleSystem("III", 0) {FailureRate = 0.0003}
                 }, ReliabilityDependency.And);
 
 
             // Act
             var sut = new SystemStateGraph(system, isTerminal);
             IReadOnlyList<WorkingProbability> actual = sut.GetProbability(0, 1000, 200);
-            var stringified = PlotDataToString(actual);
+            string stringFormat = PlotDataToString(actual);
 
             // Assert
-            Assert.Equal(expected, stringified);
+            Assert.Equal(expected, stringFormat);
         }
 
         [Fact]
@@ -57,8 +57,8 @@ namespace ReliabilityModel.Tests
                 new List<Model.System.System>
                 {
                     new SingleModuleSystem("I", 1),
-                    new SingleModuleSystem("II"),
-                    new SingleModuleSystem("III")
+                    new SingleModuleSystem("II", null),
+                    new SingleModuleSystem("III", null)
                 }, ReliabilityDependency.And);
             const string expected = @"0 -> 1?, 2?, 4?
 1? -> 0, 3?, 5?
@@ -94,8 +94,8 @@ namespace ReliabilityModel.Tests
                 new List<Model.System.System>
                 {
                     new SingleModuleSystem("I", 1),
-                    new SingleModuleSystem("II"),
-                    new SingleModuleSystem("III")
+                    new SingleModuleSystem("II", null),
+                    new SingleModuleSystem("III", null)
                 }, ReliabilityDependency.And);
             const string expected = @"0 -> 1?, 2?, 4?
 1? -> 0, 3?, 5?
@@ -149,7 +149,7 @@ namespace ReliabilityModel.Tests
         }
 
         [Theory]
-        [InlineData(new object[] { true, @"-0,0006 0 0 0 0 0 0 0 
+        [InlineData(true, @"-0,0006 0 0 0 0 0 0 0 
 0,0003 -0,0003 0 0 0 0 0 0 
 0,0002 0 -0,0004 0 0 0 0 0 
 0 0,0002 0,0003 -0,0001 0 0 0 0 
@@ -157,16 +157,17 @@ namespace ReliabilityModel.Tests
 0 0,0001 0 0 0,0003 -0,0002 0 0 
 0 0 0,0001 0 0,0002 0 -0,0003 0 
 0 0 0 0,0001 0 0,0002 0,0003 0 
-"})]
-        [InlineData(new object[] { false, @"-0,0006 0 0 0 0 0 0 
+")]
+        [InlineData(false, @"-0,0006 0 0 0 0 0 0 
 0,0003 -0,0003 0 0 0 0 0 
 0,0002 0 -0,0004 0 0 0 0 
 0 0,0002 0,0003 0 0 0 0 
 0,0001 0 0 0 0 0 0 
 0 0,0001 0 0 0 0 0 
 0 0 0,0001 0 0 0 0 
-" })]
-        public void SystemStateGraphCtor_ThreeModulesTwoParallelNoRecovery_BuildsWeightMatrix(bool includeTerminal, string expectedMatrix)
+")]
+        public void SystemStateGraphCtor_ThreeModulesTwoParallelNoRecovery_BuildsWeightMatrix(bool includeTerminal,
+            string expectedMatrix)
         {
             // Arrange
             var system = new MultipleModuleSystem(
@@ -241,21 +242,21 @@ namespace ReliabilityModel.Tests
             var system = new MultipleModuleSystem(
                 new List<Model.System.System>
                 {
-                    new SingleModuleSystem("I")
+                    new SingleModuleSystem("I", null)
                     {
                         FailureRate = 0.0001,
                         RecoveryRate = 0.03
                     },
-                    new SingleModuleSystem("II")
+                    new SingleModuleSystem("II", null)
                     {
                         FailureRate = 0.0002,
                         RecoveryRate = 0.04
                     },
-                    new SingleModuleSystem("III")
+                    new SingleModuleSystem("III", null)
                     {
                         FailureRate = 0.0003,
                         RecoveryRate = 0.05
-                    },
+                    }
                 }, ReliabilityDependency.And);
             const string expected = @"-0,0006 0,05 0,04 0 0,03 0 0 0 
 0,0003 -0,0503 0 0,04 0 0,03 0 0 
@@ -283,9 +284,9 @@ namespace ReliabilityModel.Tests
             var system = new MultipleModuleSystem(
                 new List<Model.System.System>
                 {
-                    new SingleModuleSystem("I"),
-                    new SingleModuleSystem("II"),
-                    new SingleModuleSystem("III")
+                    new SingleModuleSystem("I", null),
+                    new SingleModuleSystem("II", null),
+                    new SingleModuleSystem("III", null)
                 }, ReliabilityDependency.And);
             const string expected = @"0 -> 1?, 2?, 4?
 1? -> 0, 3?, 5?
@@ -319,9 +320,9 @@ namespace ReliabilityModel.Tests
             var system = new MultipleModuleSystem(
                 new List<Model.System.System>
                 {
-                    new MultipleModuleSystem(new List<Model.System.System> { m1, m2 }, ReliabilityDependency.And),
-                    new MultipleModuleSystem(new List<Model.System.System> { m3, m4 }, ReliabilityDependency.And),
-                    new MultipleModuleSystem(new List<Model.System.System> { m5, m6 }, ReliabilityDependency.And)
+                    new MultipleModuleSystem(new List<Model.System.System> {m1, m2}, ReliabilityDependency.And),
+                    new MultipleModuleSystem(new List<Model.System.System> {m3, m4}, ReliabilityDependency.And),
+                    new MultipleModuleSystem(new List<Model.System.System> {m5, m6}, ReliabilityDependency.And)
                 }, ReliabilityDependency.Or);
 
             const string expected = @"0 -> 1, 2, 4, 8, 16, 32
@@ -412,9 +413,9 @@ namespace ReliabilityModel.Tests
             var system = new MultipleModuleSystem(
                 new List<Model.System.System>
                 {
-                    new MultipleModuleSystem(new List<Model.System.System> { m1, m2 }, ReliabilityDependency.And),
-                    new MultipleModuleSystem(new List<Model.System.System> { m3, m4 }, ReliabilityDependency.And),
-                    new MultipleModuleSystem(new List<Model.System.System> { m5, m6 }, ReliabilityDependency.And)
+                    new MultipleModuleSystem(new List<Model.System.System> {m1, m2}, ReliabilityDependency.And),
+                    new MultipleModuleSystem(new List<Model.System.System> {m3, m4}, ReliabilityDependency.And),
+                    new MultipleModuleSystem(new List<Model.System.System> {m5, m6}, ReliabilityDependency.And)
                 }, ReliabilityDependency.Or);
 
             const string expected = @"0 -> 1, 2, 4, 8, 16, 32
@@ -464,7 +465,7 @@ namespace ReliabilityModel.Tests
             Assert.Equal(expected, actual);
         }
 
-        private string MatrixToString(double[,] matrix)
+        private static string MatrixToString(double[,] matrix)
         {
             var stringBuilder = new StringBuilder();
             for (var row = 0; row < matrix.GetLength(0); row++)
