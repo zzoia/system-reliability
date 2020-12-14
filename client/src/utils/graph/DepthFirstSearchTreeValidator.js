@@ -22,7 +22,7 @@ export class DepthFirstSearchTreeValidator {
             if (node.children.length > 1) {
                 node.children.forEach(child => {
                     if (child.parents.length > 1) {
-                        throw Error(`Знайдено сітку в графі. '${node.id}' має багатьої нащадків, з них '${child.id}' має багато предків.`);
+                        throw Error(`Знайдено сітку в графі. '${node.id}' має багатьох нащадків, з них '${child.id}' має багато предків.`);
                     }
                 });
             }
@@ -39,23 +39,23 @@ export class DepthFirstSearchTreeValidator {
             });
         }
 
-        const treeNodes = accumulator.map(treeNode => treeNode.currentModule);
+        const modules = accumulator.map(treeNode => treeNode.currentModule);
 
         accumulator.forEach(({ currentModule, node }) => {
 
             node.children.forEach(nodeChild => {
-                const childModule = treeNodes.find(cModule => cModule.id === nodeChild.id);
+                const childModule = modules.find(cModule => cModule.id === nodeChild.id);
                 currentModule.children.push(childModule);
             });
 
             node.parents.forEach(nodeParent => {
-                const parentModule = treeNodes.find(pModule => pModule.id === nodeParent.id);
+                const parentModule = modules.find(pModule => pModule.id === nodeParent.id);
                 currentModule.parents.push(parentModule);
             });
 
         });
         
-        return treeNodes;
+        return modules;
     }
 
 }

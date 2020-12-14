@@ -50,8 +50,8 @@ export class TreeBuilder {
     validateDanglingNodes() {
 
         this.nodes.forEach(treeNode => {
-            const hasNoChildren = !treeNode.children.length && treeNode[NODE_KEY] !== endNodeId;
-            const hasNoParents = !treeNode.parents.length && treeNode[NODE_KEY] !== startNodeId;
+            const hasNoChildren = !treeNode.hasChildren() && treeNode[NODE_KEY] !== endNodeId;
+            const hasNoParents = !treeNode.hasParents() && treeNode[NODE_KEY] !== startNodeId;
 
             if (hasNoChildren || hasNoParents) {
                 throw { id: treeNode[NODE_KEY] };

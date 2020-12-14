@@ -23,7 +23,7 @@ export class SequentialParallel {
         return startNode;
     }
 
-    mergeParallel = (subModule) => {
+    mergeParallel = subModule => {
 
         subModule.isVisitedByMergeSequantial = false;
         if (subModule.isVisitedByMergeParallel)
@@ -93,7 +93,7 @@ export class SequentialParallel {
         return subModule.children.length === 1 && subModule.children[0].parents.length === 1;
     }
 
-    mergeSequential = (subModule) => {
+    mergeSequential = subModule => {
 
         subModule.isVisitedByMergeParallel = false;
         if (subModule.isVisitedByMergeSequantial)
@@ -116,12 +116,22 @@ export class SequentialParallel {
             } else {
 
                 const andSubSystem = new ModuleCollection(DEPENDENCY_TYPES.And, [subModule, child]);
+
+                // Replace "subModule" with new "andSubSystem" in the graph scheme
+                // by replacing the reference from parents to new "andSubSystem"
                 subModule.parents.forEach(parent => {
+
+                    // Delete old reference to "subModule" from parents...
                     parent.children = parent.children.filter(sibling => !sibling.equalsTo(subModule));
+
+                    // ...add (replace it with) "andSubSystem"...
                     parent.children.push(andSubSystem);
+
+                    // ...create backward link from the new "andSubSystem"
                     andSubSystem.parents.push(parent);
                 });
 
+                // Erase references from current "subModule" to the graps elements
                 subModule.parents = [];
                 subModule.children = [];
 
@@ -129,11 +139,18 @@ export class SequentialParallel {
             }
 
             child.children.forEach(grandChild => {
+
+                // Children of the "eaten" element are now "subModule's" children
                 subModule.children.push(grandChild);
+
+                // Remove "eaten" child from the grandchildren...
                 grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
+
+                // ...and replace if by new "subModule"
                 grandChild.parents.push(subModule);
             });
 
+            // Remove links from "eaten" child
             child.children = [];
             child.parents = [];
         }

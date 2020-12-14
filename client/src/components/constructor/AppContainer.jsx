@@ -83,7 +83,7 @@ const validateModuleGraph = graph => {
         treeBuilder.validateDanglingNodes();
     } catch (error) {
         const errorNode = nodes.find(node => node[NODE_KEY] === error.id);
-        throw Error(`Модуль ${errorNode.title} повинен бути з'єднаним з іншими.`)
+        throw Error(`Модуль ${errorNode.title} повинен бути з'єднаним з іншими`)
     }
 
     const validator = new DepthFirstSearchTreeValidator(treeBuilder);
