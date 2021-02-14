@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using ReliabilityModel.Model.System;
+using System.Collections.Generic;
 using System.Linq;
-using ReliabilityModel.Model.System;
 
 namespace ReliabilityModel.Model
 {
@@ -40,7 +40,7 @@ namespace ReliabilityModel.Model
             isRecovering = false;
             transitionRate = 0;
 
-            OneStateTransition transition = GetOneChangeTransition(anotherSystemState);
+            var transition = GetOneChangeTransition(anotherSystemState);
             if (transition == null)
             {
                 return false;
@@ -66,8 +66,8 @@ namespace ReliabilityModel.Model
             var moduleStates = new List<ModuleState>();
             for (var index = 0; index < moduleStateIndices.Length; index++)
             {
-                IReadOnlyList<ModuleState> possibleModuleStates = modulesStates[index];
-                int moduleStateIndex = moduleStateIndices[index];
+                var possibleModuleStates = modulesStates[index];
+                var moduleStateIndex = moduleStateIndices[index];
                 moduleStates.Add(possibleModuleStates[moduleStateIndex]);
             }
 
@@ -81,17 +81,17 @@ namespace ReliabilityModel.Model
 
         private OneStateTransition GetOneChangeTransition(SystemState anotherSystemState)
         {
-            List<OneStateTransition> transitionPairs = ModuleStates
+            var transitionPairs = ModuleStates
                 .Zip(anotherSystemState.ModuleStates, (from, to) => new OneStateTransition(from, to))
                 .ToList();
 
-            List<OneStateTransition> notEqualPairs = transitionPairs.Where(pair => !pair.From.Equals(pair.To)).ToList();
+            var notEqualPairs = transitionPairs.Where(pair => !pair.From.Equals(pair.To)).ToList();
             if (notEqualPairs.Count != 1)
             {
                 return null;
             }
 
-            OneStateTransition transition = notEqualPairs.Single();
+            var transition = notEqualPairs.Single();
             return transition.From.IsValidStateChangeTo(transition.To) ? transition : null;
         }
     }

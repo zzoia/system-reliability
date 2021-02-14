@@ -23,7 +23,7 @@ export const WorkingProbabilityPlot = ({ plotData }) => {
             x: plot.plotData.map(pl => pl.time),
             y: plot.plotData.map(pl => pl.aggregatedProbability),
             mode: 'lines+markers',
-            name: `λ = ${plot.failureRate}`,
+            name: `λ = ${(plot.failureRate === -1 ? "Поточне значення" : plot.failureRate)}`,
             line: { shape: 'spline' },
             type: 'scatter'
         }

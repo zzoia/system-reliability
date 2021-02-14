@@ -4,8 +4,7 @@ import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Graph from './Graph';
 import SystemProperties from './SystemProperties';
-import ModuleGraphRules from './ModuleGraphRules';
-import ValidatedJsonGraph from './ValidatedJsonGraph';
+import StringList from '../common/StringList';
 
 import { DepthFirstSearchTreeValidator } from "../../utils/graph/DepthFirstSearchTreeValidator";
 import { TreeBuilder } from "../../utils/graph/TreeBuilder";
@@ -19,50 +18,34 @@ import { setSystemScheme } from '../../redux/systemSchemeGraphSlice';
 import { setAdjacencyList } from '../../redux/systemStateAdjacencyListSlice';
 import { setInvestigationRequest } from '../../redux/investigationRequestSlice';
 
-import { test } from "../../actions/api";
+import { test } from "../../actions/apiActions";
+import { download, readJson } from "../../actions/fileActions";
+import { getGraphData } from "../../actions/dataUtils";
+import { FilePicker } from './FilePicker';
 
 const drawerWidth = 462;
+const headerCompensation = 58;
 
 const useStyles = makeStyles(theme => ({
     root: {
         display: 'flex',
         height: "100%"
     },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    hide: {
-        display: 'none',
-    },
     drawer: {
         width: drawerWidth,
         flexShrink: 0,
     },
-    drawerJson: {
-        width: "400px",
-        flexShrink: 0,
-    },
     drawerPaper: {
         width: drawerWidth,
-    },
-    drawerPaperJson: {
-        width: "400px"
-    },
-    drawerHeader: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: theme.spacing(0, 1),
-        height: "48px",
-        justifyContent: 'flex-end',
+        paddingTop: headerCompensation
     },
     content: {
         flexGrow: 1,
-        padding: theme.spacing(3),
         transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
-        marginLeft: 0
+        paddingTop: headerCompensation
     }
 }));
 
@@ -86,30 +69,38 @@ const validateModuleGraph = graph => {
         throw Error(`Модуль ${errorNode.title} повинен бути з'єднаним з іншими`)
     }
 
+    treeBuilder.validateMissingNodes(nodes);
+
     const validator = new DepthFirstSearchTreeValidator(treeBuilder);
     const treeNodes = validator.validate();
 
-    for (let nodeIndex = 0; nodeIndex < nodes.length; nodeIndex++) {
-        const currentNode = nodes[nodeIndex];
-        if (!treeBuilder.hasNodeWithId(currentNode[NODE_KEY])) {
-            throw Error(`Модуль ${currentNode.title} не з'єднаний: з'єднайте його або видаліть`);
-        }
-    }
-
     return treeNodes;
 };
+
+export const processAndValidateGraph = graph => {
+    const data = getGraphData(graph);
+    const treeNodes = validateModuleGraph(data);
+    const processor = new SequentialParallel();
+    return processor.createComposite(treeNodes[0]);
+}
 
 const AppContainer = ({ currentGraph, setInvestigationRequest, setAdjacencyList, setSystemScheme }) => {
 
     const classes = useStyles();
 
-    const [json, setJson] = useState(null);
     const [systemModules, setSystemModules] = React.useState([]);
     const [validationMessage, setValidationMessage] = useState(null);
     const [topLevelModule, setTopLevelModule] = useState(null);
 
+    const onLoadGraphFromFile = async file => {
+        const json = await readJson(file);
+        setSystemScheme(json);
+        window.location.reload();
+    }
+
     const investigate = async moduleRates => {
 
+        download(currentGraph, "graph.json");
         setModuleRates(topLevelModule.members, moduleRates);
 
         const response = await test(topLevelModule);
@@ -120,12 +111,8 @@ const AppContainer = ({ currentGraph, setInvestigationRequest, setAdjacencyList,
 
     const onSystemSchemeChanged = graph => {
         try {
-            const treeNodes = validateModuleGraph(graph);
+            const startNode = processAndValidateGraph(graph);
 
-            const processor = new SequentialParallel();
-            const startNode = processor.createComposite(treeNodes[0])
-
-            setJson(startNode.getRepresentation());
             setValidationMessage(null);
 
             setSystemScheme(graph);
@@ -134,12 +121,17 @@ const AppContainer = ({ currentGraph, setInvestigationRequest, setAdjacencyList,
 
         } catch (error) {
             setValidationMessage(error.message);
-            setJson(null);
         }
+
+        const getRate = multiplier => {
+            const items = [1, 2, 4, 8];
+            const index = Math.floor(Math.random() * items.length);
+            return items[index] * multiplier;
+        };
 
         setSystemModules(graph.nodes
             .filter(node => node.id !== endNodeId && node.id !== startNodeId)
-            .map((node, index) => ({ title: node.title, id: node.id, failureRate: (index + 1) * 0.0001, recoveryRate: (index + 1) * 0.01, left: 0 })));
+            .map(node => ({ title: node.title, id: node.id, failureRate: getRate(0.0001), recoveryRate: getRate(0.001), left: 0 })));
     };
 
     const setModuleRates = (validatedModules, moduleRates) => {
@@ -158,23 +150,31 @@ const AppContainer = ({ currentGraph, setInvestigationRequest, setAdjacencyList,
         });
     };
 
+    const rules = [
+        "Щоб додати модулі, натисніть Shift і клацніть на сітці",
+        "Щоб додати переходи, затисніть Shift і почніть тягнути мишею від одного модуля до іншого",
+        "Щоб видалити перехід чи модуль, виберіть його за допомогою миші і натисність Delete",
+        "Перетягуйте мишею об'єкти, щоб змінити їх положення",
+        "Використовуйте 'Завантажити граф', щоб відтворити раніше створений граф, який автоматично завантажується в файл при дослідженні системи",
+        "Щоб підмодуль мав змогу відновлюватись безкінечно, в полі 'Оновлення' оберіть -1"
+    ];
+
     return (
         <div className={classes.root}>
             <CssBaseline />
             <Drawer
-                className={classes.drawerJson}
+                className={classes.drawer}
                 variant="permanent"
                 anchor="left"
                 open={true}
                 classes={{
-                    paper: classes.drawerPaperJson,
+                    paper: classes.drawerPaper,
                 }}>
-                <div className={classes.drawerHeader}/>
-                {validationMessage && <Alert severity="error">{validationMessage}</Alert>}
-                <ValidatedJsonGraph json={json} />
+                <SystemProperties
+                    modules={systemModules}
+                    onInvestigate={investigate} />
             </Drawer>
             <main className={classes.content}>
-                <div className={classes.drawerHeader} />
                 <Graph
                     onChange={onSystemSchemeChanged}
                     value={currentGraph} />
@@ -187,12 +187,9 @@ const AppContainer = ({ currentGraph, setInvestigationRequest, setAdjacencyList,
                 classes={{
                     paper: classes.drawerPaper,
                 }}>
-                <div className={classes.drawerHeader}>
-                </div>
-                <ModuleGraphRules />
-                <SystemProperties
-                    modules={systemModules}
-                    onInvestigate={investigate} />
+                <StringList items={rules} />
+                <FilePicker onUploaded={onLoadGraphFromFile} />
+                {validationMessage && <Alert severity="error">{validationMessage}</Alert>}
             </Drawer>
         </div >
     );

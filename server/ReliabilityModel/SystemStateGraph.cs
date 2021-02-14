@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Research.Oslo;
+﻿using Microsoft.Research.Oslo;
 using ReliabilityModel.Model.Helpers;
 using ReliabilityModel.Model.System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ReliabilityModel.Model
 {
@@ -28,15 +28,15 @@ namespace ReliabilityModel.Model
         {
             var transitions = new List<PossibleTransitions>();
 
-            foreach (SystemState fromState in AllPossibleStates)
+            foreach (var fromState in AllPossibleStates)
             {
                 var transition = new PossibleTransitions(fromState);
                 if (includeTerminal || !fromState.IsTerminal)
                 {
-                    foreach (SystemState toState in AllPossibleStates)
+                    foreach (var toState in AllPossibleStates)
                     {
-                        bool canTransitTo =
-                            fromState.GetTransitionRate(toState, out double rate, out bool isRecovering);
+                        var canTransitTo =
+                            fromState.GetTransitionRate(toState, out var rate, out var isRecovering);
 
                         if (canTransitTo)
                         {
@@ -55,13 +55,9 @@ namespace ReliabilityModel.Model
 
             if (!includeTerminal)
             {
-                List<SystemState> allDestinations = transitions
+                var allDestinations = transitions
                     .SelectMany(transition => transition.ToSystemStates)
                     .Select(transition => transition.ToSystemState)
-                    .ToList();
-
-                List<SystemState> allSources = transitions
-                    .Select(transition => transition.SystemState)
                     .ToList();
 
                 transitions = transitions
@@ -80,16 +76,19 @@ namespace ReliabilityModel.Model
             var equations = new double[AllPossibleStates.Count, AllPossibleStates.Count];
             for (var fromStateIdx = 0; fromStateIdx < AllPossibleStates.Count; fromStateIdx++)
             {
-                SystemState currentState = AllPossibleStates[fromStateIdx];
+                var currentState = AllPossibleStates[fromStateIdx];
 
-                PossibleTransitions transitionsForState = Transitions
-                    .SingleOrDefault(transition => transition.SystemState == currentState);
+                var transitionsForState =
+                    Transitions.SingleOrDefault(transition => transition.SystemState == currentState);
 
-                if (transitionsForState == null) continue;
-
-                foreach (SystemStateTransition nextState in transitionsForState.ToSystemStates)
+                if (transitionsForState == null)
                 {
-                    int toStateIdx = _allPossibleStates.IndexOf(nextState.ToSystemState);
+                    continue;
+                }
+
+                foreach (var nextState in transitionsForState.ToSystemStates)
+                {
+                    var toStateIdx = _allPossibleStates.IndexOf(nextState.ToSystemState);
 
                     equations[fromStateIdx, fromStateIdx] -= nextState.WithRate;
                     equations[toStateIdx, fromStateIdx] += nextState.WithRate;
@@ -101,30 +100,27 @@ namespace ReliabilityModel.Model
 
         public IReadOnlyList<WorkingProbability> GetProbability(double from, double to, double step)
         {
-            double[,] equations = BuildWeightMatrix();
+            var coefficients = BuildWeightMatrix();
 
-            var initial = new Vector(Enumerable.Repeat(0.0, AllPossibleStates.Count).ToArray());
-            initial[0] = 1.0;
-            IEnumerable<SolPoint> solution = Ode.RK547M(0, initial, (_, vector) =>
+            // The initial vector describes the situation when the first state
+            // holds true - the state where all modules are working
+            var initial = new Vector(Enumerable.Repeat(0.0, AllPossibleStates.Count).ToArray())
             {
-                var result = new double[vector.Length];
-                for (var state = 0; state < result.Length; state++)
-                {
-                    result[state] = 0;
-                    for (var component = 0; component < result.Length; component++)
-                        result[state] += equations[state, component] * vector[component];
-                }
+                [0] = 1.0
+            };
 
-                return new Vector(result);
-            });
+            var solution = Ode.RK547M(
+                0,
+                initial,
+                (_, vector) => GetNextStateProbabilityDistribution(vector, coefficients));
 
-            int[] workingIndices = AllPossibleStates
-                .Select((state, index) => new {index, state.IsWorking})
+            var workingIndices = AllPossibleStates
+                .Select((state, index) => new { index, state.IsWorking })
                 .Where(state => state.IsWorking)
                 .Select(state => state.index)
                 .ToArray();
 
-            SolPoint[] points = solution.SolveFromToStep(from, to, step).ToArray();
+            var points = solution.SolveFromToStep(from, to, step).ToArray();
             return points.Select(point => new WorkingProbability
             {
                 Time = point.T,
@@ -132,15 +128,31 @@ namespace ReliabilityModel.Model
             }).ToList();
         }
 
+        private static Vector GetNextStateProbabilityDistribution(Vector vector, double[,] coefficients)
+        {
+            var result = new double[vector.Length];
+
+            for (var stateIndex = 0; stateIndex < result.Length; stateIndex++)
+            {
+                result[stateIndex] = 0;
+                for (var componentIndex = 0; componentIndex < result.Length; componentIndex++)
+                {
+                    result[stateIndex] += coefficients[stateIndex, componentIndex] * vector[componentIndex];
+                }
+            }
+
+            return new Vector(result);
+        }
+
         private IList<SystemState> GetAllPossibleStates()
         {
-            IReadOnlyCollection<SingleModuleSystem> singleModules = _system.Flatten();
+            var singleModules = _system.Flatten();
 
             IReadOnlyList<IReadOnlyList<ModuleState>> allModulesStates = singleModules
                 .Select(singleModule => singleModule.GetPossibleNextStates())
                 .ToList();
 
-            int[] maxValues = allModulesStates.Select(singleModuleStates => singleModuleStates.Count - 1).ToArray();
+            var maxValues = allModulesStates.Select(singleModuleStates => singleModuleStates.Count - 1).ToArray();
             var systemStates = new List<int[]>
             {
                 Enumerable.Repeat(0, maxValues.Length).ToArray()

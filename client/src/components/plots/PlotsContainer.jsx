@@ -11,7 +11,7 @@ import Select from '@material-ui/core/Select';
 import { startNodeId, endNodeId } from '../../utils/GraphData';
 import TextField from '@material-ui/core/TextField';
 import { connect } from 'react-redux';
-import { getPlotData } from "../../actions/api"
+import { getPlotData } from "../../actions/apiActions"
 
 const useStyles = makeStyles(theme => ({
     container: {

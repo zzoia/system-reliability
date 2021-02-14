@@ -1,11 +1,14 @@
-﻿using System;
-using ReliabilityModel.Model.System;
+﻿using ReliabilityModel.Model.System;
+using System;
 
 namespace ReliabilityModel.Model
 {
     public class ModuleState
     {
-        public ModuleState(SingleModuleSystem module, bool isWorking, int? recoveriesLeft)
+        public ModuleState(
+            SingleModuleSystem module,
+            bool isWorking,
+            int? recoveriesLeft)
         {
             RecoveriesLeft = recoveriesLeft;
 
@@ -25,7 +28,7 @@ namespace ReliabilityModel.Model
 
         public bool IsValidStateChangeTo(ModuleState anotherModuleState)
         {
-            if (!RecoveriesLeft.HasValue && anotherModuleState.RecoveriesLeft.HasValue || 
+            if (!RecoveriesLeft.HasValue && anotherModuleState.RecoveriesLeft.HasValue ||
                 RecoveriesLeft.HasValue && !anotherModuleState.RecoveriesLeft.HasValue)
             {
                 throw new ArgumentException(
@@ -33,7 +36,7 @@ namespace ReliabilityModel.Model
                     nameof(anotherModuleState));
             }
 
-            bool infiniteRecoveryPossible = RecoveriesLeft == null;
+            var infiniteRecoveryPossible = RecoveriesLeft == null;
             if (IsWorking != anotherModuleState.IsWorking && infiniteRecoveryPossible)
             {
                 return true;
@@ -66,9 +69,9 @@ namespace ReliabilityModel.Model
         {
             unchecked
             {
-                int hashCode = RecoveriesLeft.GetHashCode();
-                hashCode = hashCode * 397 ^ (Module != null ? Module.GetHashCode() : 0);
-                hashCode = hashCode * 397 ^ IsWorking.GetHashCode();
+                var hashCode = RecoveriesLeft.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Module != null ? Module.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ IsWorking.GetHashCode();
                 return hashCode;
             }
         }

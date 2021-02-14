@@ -4,7 +4,7 @@ import { CardContent, Card } from '@material-ui/core';
 import { statusToColor } from '../states/ReliabilityModelContainer'
 import EquationRightSide from './EquationRightSide';
 import { connect } from 'react-redux';
-import { getEquationSystem } from "../../actions/api";
+import { getEquationSystem } from "../../actions/apiActions";
 
 const useStyles = makeStyles(theme => ({
     container: {

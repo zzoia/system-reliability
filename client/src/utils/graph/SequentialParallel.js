@@ -15,152 +15,106 @@ export class SequentialParallel {
 
         const lastItem = startNode.collection[startNode.collection.length - 1];
         if (lastItem.collection) {
+
+            // If item added is a collection, than it is of type "and" and contains end node.
             lastItem.collection = lastItem.collection.filter(item => item.id !== endNodeId);
         } else {
+
+            // If last item is not collection than it is end node.
             startNode.collection.pop();
         }
 
         return startNode;
     }
 
-    mergeParallel = subModule => {
+    mergeParallel = currentModule => {
 
-        subModule.isVisitedByMergeSequantial = false;
-        if (subModule.isVisitedByMergeParallel)
-            return;
+        currentModule.isVisitedByMergeSequantial = false;
+        if (currentModule.isVisitedByMergeParallel) return;
 
-        subModule.isVisitedByMergeParallel = true;
+        currentModule.isVisitedByMergeParallel = true;
 
-        const children = subModule.children;
+        if (currentModule.children.length <= 1) return;
 
-        if (children.length <= 1) {
-            return;
-        }
-
-        if (children.length === 1) {
-            this.mergeParallel(subModule.children[0]);
+        // Move to the next node and try parallel merging
+        if (currentModule.children.length === 1) {
+            this.mergeParallel(currentModule.children[0]);
             return;
         }
 
-        let commonGrandChildren = [];
-        children.forEach((child, childIndex) => {
+        const commonGrandChildren = currentModule.groupGrandChildren();
 
-            if (child.children.length === 1) {
-                const onlyChild = child.children[0];
-                const found = commonGrandChildren.find(common => common.grandChild.equalsTo(onlyChild));
+        if (!commonGrandChildren.length) {
+            currentModule.children.forEach(this.mergeParallel);
+            return;
+        }
 
-                if (found) {
-                    found.childIndices.push(childIndex);
-                } else {
-                    commonGrandChildren.push({
-                        childIndices: [childIndex],
-                        grandChild: onlyChild
-                    });
-                }
-            }
-        });
-
-        commonGrandChildren = commonGrandChildren.filter(common => common.childIndices.length > 1);
-        if (commonGrandChildren.length) {
-
-            commonGrandChildren.forEach(common => {
-                const childrenToMerge = common.childIndices.map(index => {
-                    const currentChild = children[index];
-                    currentChild.parents = [];
-                    currentChild.children = [];
-                    subModule.children = subModule.children.filter(child => !child.equalsTo(currentChild));
-                    common.grandChild.parents = common.grandChild.parents.filter(parent => !parent.equalsTo(currentChild));
-                    return currentChild;
-                });
-
-                const newModule = new ModuleCollection(DEPENDENCY_TYPES.Or, childrenToMerge);
-                newModule.children = [common.grandChild];
-                newModule.parents = [subModule];
-
-                subModule.children.push(newModule);
-                common.grandChild.parents.push(newModule);
-
-                this.mergeParallel(common.grandChild);
+        commonGrandChildren
+            .forEach(common => {
+                const newChild = this.processGrandChildConnections(currentModule, common);
+                this.mergeParallel(newChild);
             });
+    };
+
+    processGrandChildConnections = (currentModule, common) => {
+
+        common.connections
+            .forEach(child => {
+                child.clearParentChildRelations();
+                currentModule.removeChild(child);
+                common.grandChild.removeParent(child);
+            });
+
+        const newModule = new ModuleCollection(DEPENDENCY_TYPES.Or, common.connections);
+        newModule.children = [common.grandChild];
+        newModule.parents = [currentModule];
+
+        currentModule.children.push(newModule);
+        common.grandChild.parents.push(newModule);
+        return common.grandChild;
+    };
+
+    mergeSequential = currentModule => {
+
+        currentModule.isVisitedByMergeParallel = false;
+        if (currentModule.isVisitedByMergeSequantial) return currentModule;
+
+        currentModule.isVisitedByMergeSequantial = true;
+
+        if (!currentModule.children.length) return currentModule;
+
+        while (currentModule.hasOneChildWithOneParent()) {
+
+            const [newModule, child] = this.consumeSingleChild(currentModule);
+            currentModule = newModule;
+
+            child.moveChildrenTo(currentModule);
+            child.clearParentChildRelations();
+        }
+
+        currentModule.children = currentModule.children.map(this.mergeSequential);
+        return currentModule;
+    };
+
+    consumeSingleChild = module => {
+
+        const child = module.children[0];
+
+        if (module.dependency === DEPENDENCY_TYPES.And) {
+
+            module.collection.push(child);
+            module.children = [];
 
         } else {
 
-            children.forEach(child => this.mergeParallel(child));
-        }
-    };
+            const andSubSystem = new ModuleCollection(DEPENDENCY_TYPES.And, [module, child]);
 
-    hasOneChildWithOneParent(subModule) {
-        return subModule.children.length === 1 && subModule.children[0].parents.length === 1;
+            module.replaceSelfFromParents(andSubSystem);
+            module.clearParentChildRelations();
+
+            module = andSubSystem;
+        }
+
+        return [module, child];
     }
-
-    mergeSequential = subModule => {
-
-        subModule.isVisitedByMergeParallel = false;
-        if (subModule.isVisitedByMergeSequantial)
-            return subModule;
-
-        subModule.isVisitedByMergeSequantial = true;
-
-        if (!subModule.children.length) {
-            return subModule;
-        }
-
-        while (this.hasOneChildWithOneParent(subModule)) {
-
-            const child = subModule.children[0];
-            if (subModule.dependency === DEPENDENCY_TYPES.And) {
-
-                subModule.collection.push(child);
-                subModule.children = [];
-
-            } else {
-
-                const andSubSystem = new ModuleCollection(DEPENDENCY_TYPES.And, [subModule, child]);
-
-                // Replace "subModule" with new "andSubSystem" in the graph scheme
-                // by replacing the reference from parents to new "andSubSystem"
-                subModule.parents.forEach(parent => {
-
-                    // Delete old reference to "subModule" from parents...
-                    parent.children = parent.children.filter(sibling => !sibling.equalsTo(subModule));
-
-                    // ...add (replace it with) "andSubSystem"...
-                    parent.children.push(andSubSystem);
-
-                    // ...create backward link from the new "andSubSystem"
-                    andSubSystem.parents.push(parent);
-                });
-
-                // Erase references from current "subModule" to the graps elements
-                subModule.parents = [];
-                subModule.children = [];
-
-                subModule = andSubSystem;
-            }
-
-            child.children.forEach(grandChild => {
-
-                // Children of the "eaten" element are now "subModule's" children
-                subModule.children.push(grandChild);
-
-                // Remove "eaten" child from the grandchildren...
-                grandChild.parents = grandChild.parents.filter(par => !par.equalsTo(child));
-
-                // ...and replace if by new "subModule"
-                grandChild.parents.push(subModule);
-            });
-
-            // Remove links from "eaten" child
-            child.children = [];
-            child.parents = [];
-        }
-
-        const newChildren = [];
-        subModule.children.forEach(child => {
-            newChildren.push(this.mergeSequential(child));
-        });
-
-        subModule.children = newChildren;
-        return subModule;
-    };
 }

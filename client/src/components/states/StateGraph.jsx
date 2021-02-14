@@ -70,7 +70,8 @@ const config = {
 const useStyles = makeStyles(theme => ({
     container: {
         flexGrow: 1,
-        background: "#f9f9f9"
+        background: "#f9f9f9",
+        height: "100%"
     }
 }));
 

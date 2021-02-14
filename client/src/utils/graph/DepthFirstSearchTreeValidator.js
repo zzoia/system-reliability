@@ -34,9 +34,7 @@ export class DepthFirstSearchTreeValidator {
                 });
             }
 
-            node.children.forEach(child => {
-                stack.push(child);
-            });
+            node.children.forEach(child => stack.push(child));
         }
 
         const modules = accumulator.map(treeNode => treeNode.currentModule);

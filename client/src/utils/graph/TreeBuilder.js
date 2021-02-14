@@ -60,6 +60,16 @@ export class TreeBuilder {
 
     }
 
+    validateMissingNodes(nodes) {
+        
+        for (let nodeIndex = 0; nodeIndex < nodes.length; nodeIndex++) {
+            const currentNode = nodes[nodeIndex];
+            if (!this.hasNodeWithId(currentNode[NODE_KEY])) {
+                throw Error(`Модуль ${currentNode.title} не з'єднаний: з'єднайте його або видаліть`);
+            }
+        }
+    }
+
     hasNodeWithId(id) {
         return this.nodes.some(treeNode => treeNode[NODE_KEY] === id);
     }

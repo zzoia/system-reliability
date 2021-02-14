@@ -14,8 +14,8 @@ namespace ReliabilityModel.Model.Helpers
 
         public int[] Increment(IReadOnlyList<int> values)
         {
-            int[] reversedValues = values.Reverse().ToArray();
-            int[] result = reversedValues.ToArray();
+            var reversedValues = values.Reverse().ToArray();
+            var result = reversedValues.ToArray();
 
             for (var index = 0; index < reversedValues.Length; index++)
             {

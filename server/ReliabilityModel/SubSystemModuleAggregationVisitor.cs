@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using ReliabilityModel.Model.System;
+using System.Collections.Generic;
 using System.Linq;
-using ReliabilityModel.Model.System;
 
 namespace ReliabilityModel.Model
 {
@@ -20,20 +20,20 @@ namespace ReliabilityModel.Model
             switch (system)
             {
                 case MultipleModuleSystem multipleModuleSubSystem:
+                {
+                    var singleModules = multipleModuleSubSystem.SubSystems.OfType<SingleModuleSystem>();
+                    allSingleModules.AddRange(singleModules);
+
+                    var multipleModuleSubSystems =
+                        multipleModuleSubSystem.SubSystems.OfType<MultipleModuleSystem>();
+
+                    foreach (var moduleSubSystem in multipleModuleSubSystems)
                     {
-                        IEnumerable<SingleModuleSystem> singleModules = multipleModuleSubSystem.SubSystems.OfType<SingleModuleSystem>();
-                        allSingleModules.AddRange(singleModules);
-
-                        IEnumerable<MultipleModuleSystem> multipleModuleSubSystems =
-                            multipleModuleSubSystem.SubSystems.OfType<MultipleModuleSystem>();
-
-                        foreach (MultipleModuleSystem moduleSubSystem in multipleModuleSubSystems)
-                        {
-                            AggregateModules(allSingleModules, moduleSubSystem);
-                        }
-
-                        break;
+                        AggregateModules(allSingleModules, moduleSubSystem);
                     }
+
+                    break;
+                }
                 case SingleModuleSystem singleModule:
                     allSingleModules.Add(singleModule);
                     break;

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using ReliabilityModel.Model.Formatters.Filtering;
+using System;
 using System.Linq;
 using System.Text;
-using ReliabilityModel.Model.Formatters.Filtering;
 
 namespace ReliabilityModel.Model.Formatters
 {
@@ -21,7 +21,7 @@ namespace ReliabilityModel.Model.Formatters
         {
             var stringBuilder = new StringBuilder();
 
-            foreach (PossibleTransitions transition in stateGraph.Transitions)
+            foreach (var transition in stateGraph.Transitions)
             {
                 if (!_stateFilteringStrategy.IncludeState(transition.SystemState))
                 {
@@ -32,7 +32,7 @@ namespace ReliabilityModel.Model.Formatters
                 stringBuilder.Append(" -> ");
 
                 const string delimiter = ", ";
-                foreach (SystemStateTransition toSystemState in transition.ToSystemStates)
+                foreach (var toSystemState in transition.ToSystemStates)
                 {
                     stringBuilder.Append(_representation(toSystemState.ToSystemState));
                     stringBuilder.Append(delimiter);

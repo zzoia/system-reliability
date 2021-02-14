@@ -24,6 +24,10 @@ const useStyles = makeStyles(theme => ({
     },
     chip: {
         marginRight: "2px"
+    },
+    iconContainer: {
+        display: "flex",
+        alignItems: "center"
     }
 }));
 
@@ -36,21 +40,28 @@ export const SystemStateTransition = ({ transition }) => {
         setOpen(!open);
     };
 
-    const getIconComponent = (status) => {
+    const getIconComponent = state => {
+
         let icon = null;
-        switch (status) {
+    
+        switch (state.status) {
             case "terminal":
                 icon = <CancelIcon style={{ color: "red" }} />;
                 break;
+    
             case "waitingRecovery":
                 icon = <UpdateIcon style={{ color: "orange" }} />;
                 break;
+    
             case "working":
                 icon = <CheckCircleIcon style={{ color: "green" }} />;
                 break;
+    
+            default:
+                break;
         }
-
-        return icon;
+    
+        return (<div className={classes.iconContainer}>{icon}{state.index}</div>);
     }
 
     const getChips = (moduleStates) => {
@@ -69,7 +80,7 @@ export const SystemStateTransition = ({ transition }) => {
 
     const nextStates = transition.toStates.map((state, index) => (
         <ListItem key={index} button className={classes.nested}>
-            <ListItemIcon>{getIconComponent(state.toState.status)}</ListItemIcon>
+            <ListItemIcon>{getIconComponent(state.toState)}</ListItemIcon>
             {
                 getChips(state.toState.moduleStates)
             }
@@ -80,19 +91,23 @@ export const SystemStateTransition = ({ transition }) => {
         <List
             component="nav"
             className={classes.root}>
+
             <ListItem key={-1} button onClick={handleClick}>
-                <ListItemIcon>{getIconComponent(transition.fromState.status)}</ListItemIcon>
+                <ListItemIcon>{getIconComponent(transition.fromState)}</ListItemIcon>
                 <ListItemText >{
                     getChips(transition.fromState.moduleStates)
                 }</ListItemText>
                 {open ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
+
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                     {nextStates}
                 </List>
             </Collapse>
+
             <Divider />
+
         </List>
     );
 };

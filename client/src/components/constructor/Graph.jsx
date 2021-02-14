@@ -27,19 +27,19 @@ class Graph extends React.Component {
         this.GraphView = React.createRef();
     }
 
-    onGraphChanged() {
+    onGraphChanged = () => {
         this.props.onChange(JSON.parse(JSON.stringify(this.state.graph)))
     }
 
     // Helper to find the index of a given node
-    getNodeIndex(searchNode) {
+    getNodeIndex = searchNode => {
         return this.state.graph.nodes.findIndex(node => {
             return node[NODE_KEY] === searchNode[NODE_KEY];
         });
     }
 
     // Helper to find the index of a given edge
-    getEdgeIndex(searchEdge) {
+    getEdgeIndex = searchEdge => {
         return this.state.graph.edges.findIndex(edge => {
             return (
                 edge.source === searchEdge.source && edge.target === searchEdge.target
@@ -48,7 +48,7 @@ class Graph extends React.Component {
     }
 
     // Given a nodeKey, return the corresponding node
-    getViewNode(nodeKey) {
+    getViewNode = nodeKey => {
         const searchNode = {};
 
         searchNode[NODE_KEY] = nodeKey;
@@ -59,7 +59,7 @@ class Graph extends React.Component {
 
     // Called by 'drag' handler, etc..
     // to sync updates from D3 with the graph
-    onUpdateNode = (viewNode) => {
+    onUpdateNode = viewNode => {
         const graph = this.state.graph;
         const i = this.getNodeIndex(viewNode);
 
@@ -70,22 +70,39 @@ class Graph extends React.Component {
     };
 
     // Node 'mouseUp' handler
-    onSelectNode = (viewNode) => {
+    onSelectNode = viewNode => {
         // Deselect events will send Null viewNode
         this.setState({ selected: viewNode });
     };
 
     // Edge 'mouseUp' handler
-    onSelectEdge = (viewEdge) => {
+    onSelectEdge = viewEdge => {
         this.setState({ selected: viewEdge });
     };
+
+    getId = ids => {
+
+        if (!ids.length) {
+            return 1;
+        }
+
+        let indices = Array.from(Array(ids.length + 1).keys());
+        indices.shift(); // remove first zero
+
+        indices = indices.filter(index => ids.indexOf(index) < 0);
+        if (indices.length) {
+            return Math.min(...indices);
+        }
+
+        return Math.max(...ids) + 1;
+    }
 
     // Updates the graph with a new node
     onCreateNode = (x, y) => {
         const graph = this.state.graph;
 
         const ids = graph.nodes.filter(n => !isNaN(n.id)).map(n => n.id);
-        const newId = Math.max(...ids) + 1;
+        const newId = this.getId(ids);
 
         const viewNode = {
             id: newId,
@@ -211,9 +228,9 @@ class Graph extends React.Component {
         this.forceUpdate();
     };
 
-    canDeleteNode = (node) => node[NODE_KEY] !== startNodeId && node[NODE_KEY] !== endNodeId;
+    canDeleteNode = node => node[NODE_KEY] !== startNodeId && node[NODE_KEY] !== endNodeId;
 
-    setGraphRef = (el) => {
+    setGraphRef = el => {
         this.GraphView = el;
         this.onGraphChanged();
     }

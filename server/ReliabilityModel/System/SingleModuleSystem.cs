@@ -26,7 +26,7 @@ namespace ReliabilityModel.Model.System
             {
                 for (var index = 0; index < _recoveryNumber.Value; index++)
                 {
-                    int recoveriesLeft = _recoveryNumber.Value - index;
+                    var recoveriesLeft = _recoveryNumber.Value - index;
                     possibleModuleStates.Add(new ModuleState(this, true, recoveriesLeft));
                     possibleModuleStates.Add(new ModuleState(this, false, recoveriesLeft));
                 }
@@ -45,7 +45,7 @@ namespace ReliabilityModel.Model.System
 
         public override bool IsStateTerminal(SystemState systemState)
         {
-            ModuleState state = systemState.ModuleStates
+            var state = systemState.ModuleStates
                 .Single(moduleState => moduleState.Module == this);
 
             return state.IsTerminal;
@@ -53,7 +53,7 @@ namespace ReliabilityModel.Model.System
 
         public override bool WaitingRecovery(SystemState systemState)
         {
-            ModuleState state = systemState.ModuleStates
+            var state = systemState.ModuleStates
                 .Single(moduleState => moduleState.Module == this);
 
             return state.WaitingRecovery;
@@ -61,7 +61,7 @@ namespace ReliabilityModel.Model.System
 
         public override bool IsWorking(SystemState systemState)
         {
-            ModuleState state = systemState.ModuleStates
+            var state = systemState.ModuleStates
                 .Single(moduleState => moduleState.Module == this);
 
             return state.IsWorking;

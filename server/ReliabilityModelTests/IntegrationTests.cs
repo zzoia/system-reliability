@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using ReliabilityModel.Model;
 using ReliabilityModel.Model.Enums;
@@ -13,15 +14,18 @@ namespace ReliabilityModel.Tests
     public class IntegrationTests
     {
         [Theory]
-        [InlineData(true, "1 0,887 0,787 0,698 0,619 0,549 ")]
-        [InlineData(false, "1 0,887 0,787 0,698 0,619 0,549 ")]
+        [InlineData(true, "1 0.887 0.787 0.698 0.619 0.549 ")]
+        [InlineData(false, "1 0.887 0.787 0.698 0.619 0.549 ")]
         public void GetProbability_ThreeModulesTwoParallelNoRecovery_Calculates(bool isTerminal, string expected)
         {
             static string PlotDataToString(IEnumerable<WorkingProbability> data)
             {
                 var sb = new StringBuilder();
-                foreach (WorkingProbability probability in data)
-                    sb.Append(Math.Round(probability.AggregatedProbability, 3) + " ");
+                foreach (var probability in data)
+                {
+                    sb.Append(Math.Round(probability.AggregatedProbability, 3).ToString(CultureInfo.InvariantCulture) + " ");
+                }
+
                 return sb.ToString();
             }
 
@@ -43,8 +47,8 @@ namespace ReliabilityModel.Tests
 
             // Act
             var sut = new SystemStateGraph(system, isTerminal);
-            IReadOnlyList<WorkingProbability> actual = sut.GetProbability(0, 1000, 200);
-            string stringFormat = PlotDataToString(actual);
+            var actual = sut.GetProbability(0, 1000, 200);
+            var stringFormat = PlotDataToString(actual);
 
             // Assert
             Assert.Equal(expected, stringFormat);
@@ -150,22 +154,22 @@ namespace ReliabilityModel.Tests
         }
 
         [Theory]
-        [InlineData(true, @"-0,0006 0 0 0 0 0 0 0 
-0,0003 -0,0003 0 0 0 0 0 0 
-0,0002 0 -0,0004 0 0 0 0 0 
-0 0,0002 0,0003 -0,0001 0 0 0 0 
-0,0001 0 0 0 -0,0005 0 0 0 
-0 0,0001 0 0 0,0003 -0,0002 0 0 
-0 0 0,0001 0 0,0002 0 -0,0003 0 
-0 0 0 0,0001 0 0,0002 0,0003 0 
+        [InlineData(true, @"-0.0006 0 0 0 0 0 0 0 
+0.0003 -0.0003 0 0 0 0 0 0 
+0.0002 0 -0.0004 0 0 0 0 0 
+0 0.0002 0.0003 -0.0001 0 0 0 0 
+0.0001 0 0 0 -0.0005 0 0 0 
+0 0.0001 0 0 0.0003 -0.0002 0 0 
+0 0 0.0001 0 0.0002 0 -0.0003 0 
+0 0 0 0.0001 0 0.0002 0.0003 0 
 ")]
-        [InlineData(false, @"-0,0006 0 0 0 0 0 0 
-0,0003 -0,0003 0 0 0 0 0 
-0,0002 0 -0,0004 0 0 0 0 
-0 0,0002 0,0003 0 0 0 0 
-0,0001 0 0 0 0 0 0 
-0 0,0001 0 0 0 0 0 
-0 0 0,0001 0 0 0 0 
+        [InlineData(false, @"-0.0006 0 0 0 0 0 0 
+0.0003 -0.0003 0 0 0 0 0 
+0.0002 0 -0.0004 0 0 0 0 
+0 0.0002 0.0003 0 0 0 0 
+0.0001 0 0 0 0 0 0 
+0 0.0001 0 0 0 0 0 
+0 0 0.0001 0 0 0 0 
 ")]
         public void SystemStateGraphCtor_ThreeModulesTwoParallelNoRecovery_BuildsWeightMatrix(bool includeTerminal,
             string expectedMatrix)
@@ -193,8 +197,8 @@ namespace ReliabilityModel.Tests
             var sut = new SystemStateGraph(system, includeTerminal);
 
             // Act
-            double[,] weightMatrix = sut.BuildWeightMatrix();
-            string weightMatrixString = MatrixToString(weightMatrix);
+            var weightMatrix = sut.BuildWeightMatrix();
+            var weightMatrixString = MatrixToString(weightMatrix);
 
             // Assert
             Assert.Equal(expectedMatrix, weightMatrixString);
@@ -220,17 +224,17 @@ namespace ReliabilityModel.Tests
                         FailureRate = 0.0003
                     }
                 }, ReliabilityDependency.And);
-            const string expectedMatrix = @"-0,0006 0 0 0 
-0,0003 0 0 0 
-0,0002 0 0 0 
-0,0001 0 0 0 
+            const string expectedMatrix = @"-0.0006 0 0 0 
+0.0003 0 0 0 
+0.0002 0 0 0 
+0.0001 0 0 0 
 ";
 
             var sut = new SystemStateGraph(system, false);
 
             // Act
-            double[,] weightMatrix = sut.BuildWeightMatrix();
-            string weightMatrixString = MatrixToString(weightMatrix);
+            var weightMatrix = sut.BuildWeightMatrix();
+            var weightMatrixString = MatrixToString(weightMatrix);
 
             // Assert
             Assert.Equal(expectedMatrix, weightMatrixString);
@@ -259,20 +263,20 @@ namespace ReliabilityModel.Tests
                         RecoveryRate = 0.05
                     }
                 }, ReliabilityDependency.And);
-            const string expected = @"-0,0006 0,05 0,04 0 0,03 0 0 0 
-0,0003 -0,0503 0 0,04 0 0,03 0 0 
-0,0002 0 -0,0404 0,05 0 0 0,03 0 
-0 0,0002 0,0003 -0,0901 0 0 0 0,03 
-0,0001 0 0 0 -0,0305 0,05 0,04 0 
-0 0,0001 0 0 0,0003 -0,0802 0 0,04 
-0 0 0,0001 0 0,0002 0 -0,0703 0,05 
-0 0 0 0,0001 0 0,0002 0,0003 -0,12 
+            const string expected = @"-0.0006 0.05 0.04 0 0.03 0 0 0 
+0.0003 -0.0503 0 0.04 0 0.03 0 0 
+0.0002 0 -0.0404 0.05 0 0 0.03 0 
+0 0.0002 0.0003 -0.0901 0 0 0 0.03 
+0.0001 0 0 0 -0.0305 0.05 0.04 0 
+0 0.0001 0 0 0.0003 -0.0802 0 0.04 
+0 0 0.0001 0 0.0002 0 -0.0703 0.05 
+0 0 0 0.0001 0 0.0002 0.0003 -0.12 
 ";
             var sut = new SystemStateGraph(system, true);
 
             // Act
-            double[,] actual = sut.BuildWeightMatrix();
-            string matrixString = MatrixToString(actual);
+            var actual = sut.BuildWeightMatrix();
+            var matrixString = MatrixToString(actual);
 
             // Assert
             Assert.Equal(expected, matrixString);
@@ -473,7 +477,7 @@ namespace ReliabilityModel.Tests
             {
                 for (var col = 0; col < matrix.GetLength(1); col++)
                 {
-                    stringBuilder.Append(Math.Round(matrix[row, col], 4, MidpointRounding.AwayFromZero));
+                    stringBuilder.Append(Math.Round(matrix[row, col], 4, MidpointRounding.AwayFromZero).ToString(CultureInfo.InvariantCulture));
                     stringBuilder.Append(" ");
                 }
 

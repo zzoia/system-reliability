@@ -4,7 +4,6 @@ import { makeStyles, Button } from '@material-ui/core';
 
 const useStyles = makeStyles({
     systemRates: {
-        marginLeft: "4px",
         display: "flex",
         flexDirection: "column"
     },

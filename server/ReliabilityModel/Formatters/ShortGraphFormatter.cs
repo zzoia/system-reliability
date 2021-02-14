@@ -8,7 +8,6 @@ namespace ReliabilityModel.Model.Formatters
             stateFilteringStrategy,
             state => $"{state.Index}{GetStateSuffix(state)}")
         {
-
         }
     }
 }

@@ -20,7 +20,7 @@ export const ValidatedJsonGraph = ({ json }) => {
 
     const classes = useStyles();
 
-    if (!json) return (<div></div>);
+    if (!json) (<div></div>);
 
     return (
         <div>
@@ -32,7 +32,7 @@ export const ValidatedJsonGraph = ({ json }) => {
             </List>
 
             <div className={classes.margin}>
-                <ReactJson src={json} style={{ fontSize: "18px" }} />
+                <ReactJson src={json} style={{ fontSize: "16px" }} />
             </div>
         </div>
     );
